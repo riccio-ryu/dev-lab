@@ -1,0 +1,38 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Node
+node_modules/
+.next/
+.nuxt/
+dist/
+build/
+out/
+coverage/
+.turbo/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Data (큰 데이터 파일은 커밋하지 않기)
+*.csv
+*.parquet
+*.sqlite
+*.db
+!**/sample*.csv
