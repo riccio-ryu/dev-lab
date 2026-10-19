@@ -36,3 +36,6 @@ venv/
 *.sqlite
 *.db
 !**/sample*.csv
+
+# 개인 메모 · 인계 문서 (회사명, 면접 내용 포함 — 공개 금지)
+docs/handoff/

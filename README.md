@@ -11,6 +11,26 @@
 | [`build-tools/`](./build-tools) | Vite, Babel, Webpack 등 번들러 · 트랜스파일러 |
 | [`backend/`](./backend) | 서버, API, DB 등 |
 | [`data/`](./data) | 데이터 처리 · 분석 |
+| [`algorithm/`](./algorithm) | 자료구조 · 알고리즘 패턴 |
+
+### 폴더 이름 규칙
+
+**공부할 것 하나 = 폴더 하나.** 이름은 `주제[-변형]` 형식의 소문자 kebab-case로 짓습니다.
+같은 주제라도 버전이나 프레임워크가 다르면 폴더를 따로 만듭니다.
+
+```
+frontend/
+├── next-10-to-14/       Next 버전업 (출발 → 도착 버전)
+├── next-10-to-15/
+├── next-11-to-14/
+├── debounce/            기본은 바닐라 JS 또는 React
+├── debounce-vue/        프레임워크가 다르면 접미사
+└── intersection-observer/
+backend/
+└── websocket/
+algorithm/
+└── prefix-sum/
+```
 
 ## 📝 실험 목록
 
@@ -21,7 +41,7 @@
 ## ➕ 새 실험 추가하기
 
 ```bash
-cp -r _template frontend/my-new-experiment
+cp -r _template frontend/debounce-vue
 ```
 
-그다음 해당 폴더의 README를 채우고, 위 **실험 목록**에 한 줄을 추가합니다.
+그다음 해당 폴더의 README를 채우고(✍️ 표시는 직접 작성하는 칸), 위 **실험 목록**에 한 줄을 추가합니다.
