@@ -36,7 +36,7 @@ algorithm/
 
 | 날짜 | 분류 | 실험 | 한 줄 요약 |
 | --- | --- | --- | --- |
-| - | - | - | - |
+| 2026-10-26 | frontend | [next-10-to-14](./frontend/next-10-to-14) | Next 10 → 14 버전업 (Pages 유지 → App Router 이전) |
 
 ## ➕ 새 실험 추가하기
 
