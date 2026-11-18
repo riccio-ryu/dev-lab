@@ -167,6 +167,35 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 - 저장할 때 에디터가 자동으로 포맷해서 파일 전체가 큰따옴표와 세미콜론 스타일로 바뀌었다. 그 바람에 바꾼 줄이 diff에 묻혔다.
 - `.prettierrc`(`singleQuote`, `semi: false`, `printWidth: 120`)를 추가하고 원래 스타일로 되돌렸다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) B. Next 13.5.11로 올리기 (코드 수정 없이)
+
+일부러 코드는 고치지 않고 Next만 올렸다. 무엇이 깨지는지 보려는 단계다.
+
+**빌드와 smoke는 통과했다.** 빌드가 깨질 거라고 예상했는데 틀렸다.
+- Next의 `client/link.js`를 보면 `Invalid <Link> with <a> child` 검사가 `process.env.NODE_ENV === "development"`일 때만 돈다.
+- Image의 `has legacy prop "layout". Did you forget to run the codemod?` 경고도 dev에서만 나온다.
+- 그래서 `next build`와 smoke는 둘 다 통과했다.
+
+**그런데 결과물은 망가져 있다.** 빌드된 `.next/server/pages/index.html`을 열어 보면 이렇다.
+```html
+<a href="/"><a class="sc-...">홈</a></a>
+<li><a href="/posts/1"><a>Next 10 시작하기</a></a>
+```
+- Next 13의 `Link`는 직접 `<a>`를 만든다. 그 안에 원래 넣어 둔 `<a>`가 그대로 들어가서 `<a>` 안에 `<a>`가 생겼다.
+- HTML 규칙상 허용되지 않는 구조이고, 안쪽 `<a>`에는 `href`도 없다.
+- smoke는 상태 코드와 글자만 검사해서 이 문제를 못 잡는다.
+- 반면 `gallery`의 `layout="fill"` + `objectFit="cover"`는 Next 13이 `fill`과 `object-fit:cover`로 바꿔서 정상적으로 그렸다. 예전 속성을 아직 호환 처리해 준다.
+
+**dev 모드에서는 바로 깨진다.**
+- `/`를 열면 `Server Error: Invalid <Link> with <a> child. Please remove <a> or use <Link legacyBehavior>.` 오버레이가 뜬다.
+- 모든 페이지가 쓰는 `Layout`에 Link가 있어서 다른 페이지도 같다. 그래서 `/gallery`의 Image 경고는 Link를 고치기 전까지 볼 수 없다.
+
+**배운 점**: 빌드와 smoke가 통과해도 dev 모드를 꼭 열어 봐야 한다. "단계마다 확인할 것"에 dev 콘솔 확인이 들어 있는 이유다.
+
+**번들 크기**: 공통 JS 93.6 kB → 94.6 kB (`baseline/build-next13.5.11.txt`)
+
+**❓의 답 (codemod 전에 커밋하는 이유)**: 이 상태를 먼저 커밋해 두면 다음 커밋의 diff가 codemod가 바꾼 것만 남는다. codemod 결과가 마음에 안 들면 `git checkout .` 한 번으로 되돌릴 수 있다.
+
 ### 13 → 14
 
 | 어디서 | 무슨 일 | 찾아볼 키워드 |

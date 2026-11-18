@@ -52,6 +52,7 @@ npm run baseline       # 빌드 출력을 baseline/에 저장
 1. **10 → 11** (2026-11-18): webpack 5에서 `config.node = { fs: 'empty' }` 때문에 빌드가 실패했다. 쓰는 곳이 없는 설정이라 `webpack` 블록을 주석 처리했고, smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 10 → 11](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1023--1114)
 2. **11 → 12** (2026-11-18): `.babelrc`가 있으면 SWC가 꺼진다. `.babelrc`를 지우고 `compiler.styledComponents`로 옮겼더니 SSR과 displayName 모두 그대로 동작했고, smoke 12/12 통과. 그런데 공통 JS는 87.9 kB에서 90.4 kB로 오히려 늘었다. 자세한 내용은 [UPGRADE_NOTES.md의 11 → 12](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1114--1237)
 3. **12 → 13 (A. React 18 먼저)** (2026-11-19): Next 12에 그대로 있으면서 TS 5와 React 18을 먼저 올렸다. `React.FC`가 children을 자동으로 넣어 주지 않아서 타입 에러 8개가 났고, `Props`에 `children`을 적어서 해결했다. 하이드레이션 경고가 에러로 바뀌어서 `RenderedAt`에 `suppressHydrationWarning`을 붙였다. smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 12 → 13](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-a-react-18-먼저-next-1237-그대로)
+4. **12 → 13 (B. Next 13.5.11로 올리기)** (2026-11-19): 코드는 고치지 않고 Next만 올렸다. 빌드와 smoke는 통과했지만 HTML에 `<a>` 안에 `<a>`가 생겼고, dev에서는 `Invalid <Link> with <a> child` 에러가 났다. 검사가 dev 모드에서만 돌기 때문이다. 자세한 내용은 [UPGRADE_NOTES.md의 12 → 13 B](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-b-next-13511로-올리기-코드-수정-없이)
 
 ## ✅ 결과 & 배운 점 ✍️
 -
