@@ -49,7 +49,7 @@ npm run baseline       # 빌드 출력을 baseline/에 저장
 ```
 
 ## 🔬 해본 것 ✍️
-1.
+1. **10 → 11** (2026-11-18): webpack 5에서 `config.node = { fs: 'empty' }` 때문에 빌드가 실패했다. 쓰는 곳이 없는 설정이라 `webpack` 블록을 지웠고, smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 10 → 11](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1023--1114)
 
 ## ✅ 결과 & 배운 점 ✍️
 -

@@ -55,6 +55,26 @@ Next만 올리면 끝나지 않는다. 각 단계에서 아래도 맞는 버전�
 
 ❓ 생각해 볼 것: `config.node = { fs: 'empty' }`는 애초에 이 프로젝트에 필요했을까?
 
+#### ✅ 실제로 해 보니 (2026-11-18, 10.2.3 → 11.1.4)
+
+- **깨진 곳**: `next build`가 `ValidationError: Invalid configuration object. Webpack has been initialized using a configuration object that does not match the API schema.`로 실패했다.
+  - 원인: webpack 5는 `node` 옵션에 `fs: 'empty'` 같은 값을 받지 않는다. webpack 4 전용 문법이었다.
+  - `npm run baseline`은 `tee`로 stdout만 저장하기 때문에 에러는 파일에 남지 않고 빌드 로그가 중간에 끊긴다.
+- **고친 방법**: `next.config.js`의 `webpack` 블록을 통째로 지웠다.
+  - 이유: `pages/`, `components/`, `lib/` 어디에서도 `fs`를 import하지 않는다. 클라이언트 번들에서 `fs`를 빈 모듈로 바꿀 일이 처음부터 없었고, 아무 일도 하지 않던 설정이었다. (❓의 답: 필요 없었다)
+  - 정말 필요했다면 webpack 5에서는 `config.resolve.fallback = { ...config.resolve.fallback, fs: false }`로 쓴다.
+  - 덤으로, 커스텀 webpack 설정이 없어졌으니 12 이후 버전업에서도 신경 쓸 곳이 하나 줄었다.
+- **결과**
+  - smoke 12/12 통과
+  - 렌더링 방식(● ○ λ)은 10과 같다. `/posts/[id]` 옆에 `(ISR: 60 Seconds)`가 새로 표시된다.
+  - First Load JS 공통 부분이 78.5 kB에서 81.4 kB로 늘었다. webpack 5가 chunk를 나누는 방식이 달라서 `commons` chunk가 없어지고 `main`과 `_app`이 커졌다.
+  - `next-env.d.ts`에 `next/image-types/global` 참조가 자동으로 추가됐다.
+- **dev 모드 콘솔**
+  - `/`: `Warning: Text content did not match. Server: "오후 10:32:49" Client: "오후 10:32:50"`. `RenderedAt`이 일부러 서버와 클라이언트에서 다른 값을 그리게 만든 부분이라, 이번 버전업 때문에 생긴 경고는 아니다. React 18(12 → 13)에서 어떻게 달라지는지 다시 본다.
+  - `/client`: 경고 없음
+  - `favicon.ico` 404: `public/`에 파비콘이 없어서 나는 것이고 버전업과는 관계없다.
+- **무시해도 되는 것**: `npm start` 때 나오는 `sharp` 경고. 프로덕션 이미지 최적화용 선택 패키지를 설치하라는 권장일 뿐이다.
+
 ### 11 → 12
 
 | 어디서 | 무슨 일 | 찾아볼 키워드 |
