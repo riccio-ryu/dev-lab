@@ -59,6 +59,7 @@ npm run baseline       # 빌드 출력을 baseline/에 저장
 8. **2단계 2. 공통 뼈대 + `/gallery` + 404** (2026-11-19): `app/layout.tsx`와 styled-components registry, ThemeProvider를 만들고 `/gallery`를 옮겼다. `app/`이 생기자마자 없는 주소를 App Router가 처리해서 smoke 404 검사가 실패했다. 그래서 404도 바로 `app/not-found.tsx`로 옮겼다. `@types/styled-components`가 React 17 시절 타입이라 5.1.36으로 올렸다. smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 2](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-2-공통-뼈대--gallery--404)
 9. **2단계 3. `/client`** (2026-11-19): page는 서버 컴포넌트로 두고 `metadata`만 정했다. 상태를 쓰는 부분은 `ClientView`(`'use client'`)로 뺐다. `'use client'`도 첫 HTML은 서버에서 그리기 때문에 `dynamic(ssr: false)`는 그대로 필요했다. `reactStrictMode: false`가 app에도 적용돼서 fetch 호출 횟수는 1이었다. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 3](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-3-client)
 10. **2단계 4. `/`(홈)** (2026-11-19): `getStaticProps`를 없애고 서버 컴포넌트에서 데이터를 바로 가져왔다. 그래도 `○ (Static)`으로 빌드할 때 한 번만 렌더링됐다. `title.template`이 layout과 같은 폴더의 page에는 적용되지 않아서, 홈만 전체 제목을 직접 적었다. First Load JS는 102 → 116 kB로 늘었다. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 4](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-4--홈)
+11. **2단계 5. `/posts/[id]`** (2026-11-19): `getStaticPaths`/`getStaticProps`를 `generateStaticParams`, `dynamicParams`, `revalidate`, `notFound()`로 바꿨다. 1단계 내내 200 + "로딩 중"이던 `/posts/999`가 처음으로 **404**를 응답했다. 그런데 `loading.tsx`를 넣으면 Suspense 때문에 다시 200이 됐다. 그래서 넣지 않았다. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 5](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-5-postsid)
 
 ## ✅ 결과 & 배운 점 ✍️
 -

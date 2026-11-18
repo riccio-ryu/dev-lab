@@ -464,6 +464,48 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 
 **결과**: smoke 12/12. dev에서 스타일, 로고, 제목 모두 예전과 같다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) 5. `/posts/[id]`
+
+| Pages Router | App Router |
+|---|---|
+| `getStaticPaths`의 `paths: [첫 글]` | `generateStaticParams()` → `[{ id: '1' }]` |
+| `fallback: true` | `dynamicParams = true` (기본값이지만 비교하려고 적어 둠) |
+| `revalidate: 60` | `export const revalidate = 60` |
+| `notFound: true` 반환 | `notFound()` 호출 |
+| `<Layout title={post.title}>` | `generateMetadata()` |
+| `router.isFallback`일 때 "로딩 중..." | 없앰 (아래 실험 참고) |
+
+**결과: `/posts/999`가 드디어 404를 응답한다** ("버전마다 관찰할 것"의 답)
+
+| 요청 | Pages Router (10 ~ 14) | App Router |
+|---|---|---|
+| `/posts/1` (빌드할 때 생성) | 200 | 200 |
+| `/posts/2` (요청이 오면 생성) | 200, 처음엔 "로딩 중" 화면 | 200, 처음부터 글 내용 |
+| `/posts/999` (없는 글) | 200 + "로딩 중" → 브라우저에서 404 | **404** |
+
+- App Router의 `dynamicParams`는 Pages Router의 `fallback: 'blocking'`처럼 동작한다. 처음 요청이 오면 서버가 다 만든 다음에 응답한다. 그래서 서버가 404를 판단할 수 있다.
+- **404 결과도 캐시된다.**
+  - `.next/server/app/posts/`에 `999.html`이 생기고, `999.meta`에 `"status":404`가 저장됐다.
+  - `revalidate = 60`이라서, 나중에 999번 글이 생기면 60초가 지난 뒤 다시 만든다.
+
+**실험: `loading.tsx`를 넣으면 다시 200이 된다**
+- 예전의 "로딩 중" 화면을 살리려고 `app/posts/[id]/loading.tsx`를 넣고 빌드했다.
+  ```
+  /posts/999 → 200
+  <main><!--$!--><template data-dgst="NEXT_NOT_FOUND"></template><p>로딩 중...</p><!--/$--></main>
+  ```
+- `loading.tsx`가 있으면 page가 Suspense로 감싸진다. 서버는 로딩 화면부터 보내기 시작하는데, 상태 코드는 응답을 처음 보낼 때 이미 200으로 정해진다.
+- 그 뒤에 `notFound()`가 나와도 상태 코드를 바꿀 수 없다. 그래서 브라우저에서 404 화면으로 바꾸는 표시(`NEXT_NOT_FOUND`)만 남는다.
+- 이 페이지는 기다릴 데이터가 없어서 `loading.tsx`를 쓰지 않았다. **`fallback: true`와 같은 문제가 `loading.tsx`로 다시 생길 수 있다**는 점을 기억해 둔다.
+- smoke는 `/posts/999`를 검사하지 않아서 이 차이를 못 잡는다.
+
+**그 밖에**
+- 빌드된 `/posts/1` HTML에 "페이지를 찾을 수 없습니다"가 들어 있지만, 화면에 보이는 부분이 아니라 RSC payload에 들어 있는 `not-found` 화면이다. 브라우저에서 이동하다 404가 나면 바로 보여 주려는 용도다.
+- App Router 빌드 표에는 `(ISR: 60 Seconds)` 표시가 없다. 기호만 `●`다.
+- `/`와 `/posts/*`가 둘 다 app이라서 이제 전체 새로고침 없이 이동한다.
+
+**결과**: smoke 12/12, `/posts/999` → 404
+
 ---
 
 ## 공식 문서
