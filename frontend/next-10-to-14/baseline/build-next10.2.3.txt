@@ -1,0 +1,38 @@
+info  - Using webpack 4. Reason: custom webpack configuration in next.config.js https://nextjs.org/docs/messages/webpack5
+info  - Checking validity of types...
+info  - Creating an optimized production build...
+info  - Using external babel configuration from /Users/youyeonchang/Desktop/Git/dev-lab/frontend/next-10-to-14/.babelrc
+info  - Compiled successfully
+info  - Collecting page data...
+info  - Generating static pages (0/7)
+info  - Generating static pages (1/7)
+info  - Generating static pages (3/7)
+info  - Generating static pages (5/7)
+info  - Generating static pages (7/7)
+info  - Finalizing page optimization...
+
+Page                                                           Size     First Load JS
+┌ ● /                                                          3.25 kB        85.8 kB
+├   /_app                                                      0 B            78.5 kB
+├ ○ /404                                                       358 B          82.9 kB
+├ λ /api/posts                                                 0 B            78.5 kB
+├ λ /api/time                                                  0 B            78.5 kB
+├ ○ /client                                                    3.04 kB        85.6 kB
+├ ○ /gallery                                                   3.17 kB        85.7 kB
+├ ● /posts/[id]                                                405 B          82.9 kB
+├   └ /posts/1
+└ λ /ssr                                                       385 B          82.9 kB
++ First Load JS shared by all                                  78.5 kB
+  ├ chunks/b6028126c934a857e1fc86be0d35df3016df5697.609e92.js  14.2 kB
+  ├ chunks/commons.2efbfa.js                                   13.6 kB
+  ├ chunks/framework.3a2305.js                                 41.9 kB
+  ├ chunks/main.64a0eb.js                                      6.94 kB
+  ├ chunks/pages/_app.5700b8.js                                621 B
+  ├ chunks/webpack.c52168.js                                   1.19 kB
+  └ css/e280e35188803ccfbc1f.css                               91 B
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+   (ISR)     incremental static regeneration (uses revalidate in getStaticProps)
+

@@ -1,0 +1,36 @@
+info  - Using webpack 5. Reason: Enabled by default https://nextjs.org/docs/messages/webpack5
+info  - Checking validity of types...
+info  - Creating an optimized production build...
+info  - Using external babel configuration from /Users/youyeonchang/Desktop/Git/dev-lab/frontend/next-10-to-14/.babelrc
+info  - Compiled successfully
+info  - Collecting page data...
+info  - Generating static pages (0/7)
+info  - Generating static pages (1/7)
+info  - Generating static pages (3/7)
+info  - Generating static pages (5/7)
+info  - Generating static pages (7/7)
+info  - Finalizing page optimization...
+
+Page                                        Size     First Load JS
+┌ ● /                                       1.12 kB        87.1 kB
+├   /_app                                   0 B            81.4 kB
+├ ○ /404                                    2.25 kB        83.7 kB
+├ λ /api/posts                              0 B            81.4 kB
+├ λ /api/time                               0 B            81.4 kB
+├ ○ /client                                 4.64 kB        86.1 kB
+├ ○ /gallery                                1.08 kB          87 kB
+├ ● /posts/[id] (ISR: 60 Seconds) (407 ms)  2.29 kB        83.7 kB
+├   └ /posts/1
+└ λ /ssr                                    2.27 kB        83.7 kB
++ First Load JS shared by all               81.4 kB
+  ├ chunks/framework.717d42.js              42.2 kB
+  ├ chunks/main.d32200.js                   23.4 kB
+  ├ chunks/pages/_app.e42e92.js             14.4 kB
+  ├ chunks/webpack.1336da.js                1.45 kB
+  └ css/b9d2ae0f3fd45a91ae97.css            91 B
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+   (ISR)     incremental static regeneration (uses revalidate in getStaticProps)
+

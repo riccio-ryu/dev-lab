@@ -1,0 +1,18 @@
+
+> smoke
+> node scripts/smoke.mjs
+
+✅ SSG 홈 (GET /)
+✅ styled-components SSR (GET /)
+✅ 빌드 시 생성된 글 (GET /posts/1)
+✅ fallback 글 (GET /posts/2)
+✅ SSR 페이지 (GET /ssr)
+✅ SSR 리다이렉트 (GET /ssr?login=0)
+✅ next.config 리다이렉트 (GET /old-blog/2)
+✅ CSR 페이지 (GET /client)
+✅ next/image (GET /gallery)
+✅ API GET (GET /api/time)
+✅ API 405 (POST /api/posts)
+✅ 없는 페이지 (GET /nope)
+
+12/12 통과

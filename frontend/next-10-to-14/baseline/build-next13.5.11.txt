@@ -1,0 +1,35 @@
+   Linting and checking validity of types ...
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7) 
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (pages)                               Size     First Load JS
+┌ ● / (351 ms)                              1.23 kB         102 kB
+├   /_app                                   0 B            94.5 kB
+├ ○ /404                                    1.05 kB        98.1 kB
+├ λ /api/posts                              0 B            94.5 kB
+├ λ /api/time                               0 B            94.5 kB
+├ ○ /client (341 ms)                        3.47 kB         100 kB
+├ ○ /gallery (371 ms)                       1.21 kB         102 kB
+├ ● /posts/[id] (ISR: 60 Seconds) (682 ms)  1.09 kB        98.1 kB
+├   └ /posts/1 (353 ms)
+└ λ /ssr                                    1.06 kB        98.1 kB
++ First Load JS shared by all               94.6 kB
+  ├ chunks/framework-fae63b21a27d6472.js    45.3 kB
+  ├ chunks/main-5232346dfb644e31.js         32.8 kB
+  ├ chunks/pages/_app-99f70ba9447fe6cd.js   14.7 kB
+  ├ chunks/webpack-d00b00ba9187b295.js      1.64 kB
+  └ css/aa7fb52cc0fbad7e.css                91 B
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+   (ISR)     incremental static regeneration (uses revalidate in getStaticProps)
+
