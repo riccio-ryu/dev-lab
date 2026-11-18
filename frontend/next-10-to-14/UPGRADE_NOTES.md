@@ -196,6 +196,46 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 
 **❓의 답 (codemod 전에 커밋하는 이유)**: 이 상태를 먼저 커밋해 두면 다음 커밋의 diff가 codemod가 바꾼 것만 남는다. codemod 결과가 마음에 안 들면 `git checkout .` 한 번으로 되돌릴 수 있다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) C. codemod로 Link와 Image 고치기
+
+**codemod 공통으로 겪은 것**
+- **안전장치**: 처음 실행하면 `please stash or commit your git changes`라는 메시지와 함께 멈춘다. 이 검사는 폴더가 아니라 `dev-lab` 저장소 전체를 본다. 그래서 추적하지 않는 다른 실습 폴더 때문에 걸렸다. 이 폴더는 이미 커밋해 둔 상태라 `--force`로 건너뛰었다.
+- **경로**: `pages components`처럼 경로를 두 개 주면 첫 번째만 처리됐다. `.`로 주면 `node_modules`와 `.next`는 자동으로 제외된다.
+- **포맷**: codemod도 큰따옴표와 세미콜론을 넣는다. 매번 `npx prettier@3.3.3 --write <파일>`로 맞췄다.
+- **미리보기**: `--dry --print`를 붙이면 파일을 바꾸지 않고 결과만 볼 수 있다.
+
+**Link: `npx @next/codemod@13.5.11 new-link . --force`** (커밋 `4ac808f`)
+- `<Link><a>글</a></Link>`는 안쪽 `<a>`를 없애고 `<Link>글</Link>`로 바꿨다. `index.tsx`에서 2곳, `404.tsx`에서 1곳이다.
+- `<Link passHref><NavLink>`(`Layout.tsx`)는 자식이 styled `a`라서 자동으로 바꾸지 못했다. 대신 `legacyBehavior`를 붙여서 예전 방식을 그대로 유지했다. **고친 게 아니라 미뤄 둔 것이다.**
+- 확인한 것
+  - dev 에러가 사라졌다.
+  - 빌드 HTML에서 `<a>` 중첩이 0개가 됐다. 메뉴는 `<a href="/" class="sc-...">홈</a>`, 글 목록은 `<a href="/posts/1">`로 `<a>`가 하나씩만 남았다.
+
+**Image: codemod 두 개를 순서대로 돌렸다**
+1. `next-image-to-legacy-image`: `next/image` → `next/legacy/image`. 예전 컴포넌트를 그대로 쓰는 방법이라 이것만 하면 미뤄 두는 것과 같다.
+2. `next-image-experimental`: `next/legacy/image` → 새 `next/image`. 1번 없이 바로 돌리면 아무것도 바뀌지 않는다(`unmodified`).
+
+| 예전 | 새 Image (codemod 결과) |
+|---|---|
+| `layout="fill"` `objectFit="cover"` | `fill` + `sizes` + `style={{ objectFit: 'cover' }}` |
+| `layout="responsive"` | `sizes` + `style={{ width: '100%', height: 'auto' }}` |
+| `layout="fixed"` | 속성 없음. 새 Image의 기본 동작이 고정 크기다 |
+| `layout` 없음 (`index.tsx` 로고) | `style={{ maxWidth: '100%', height: 'auto' }}` |
+
+- **놓치기 쉬운 것**: 예전 Image의 기본값은 `intrinsic`이었다. 원래 크기로 보이다가 화면이 더 좁으면 함께 줄어드는 방식이다. 새 Image의 기본값은 고정 크기다. 그래서 `layout`을 안 쓴 로고에도 codemod가 style을 붙였다. 로고가 120px로 보이고 창을 줄이면 함께 줄어드는 것을 확인했다.
+
+**codemod 결과도 검토해야 한다: `sizes="100vw"`**
+- codemod가 넣은 `sizes="100vw"` 때문에 dev에서 `has "fill" but is missing "sizes"` 경고가 계속 났다.
+- Next 코드를 보면 이 경고는 `sizes`가 없을 때뿐만 아니라 **`sizes`가 `100vw`인데 실제 너비가 화면의 60%보다 좁을 때**도 나온다.
+- 이 프로젝트는 `Layout`의 `Main`이 `max-width: 720px`이다. 그래서 `sizes`를 `'(max-width: 720px) 100vw, 672px'`(720px에서 좌우 padding 24px씩을 뺀 값)로 바꾸니 경고가 사라졌다.
+- `sizes`는 브라우저가 어떤 크기의 이미지 파일을 받을지 정하는 힌트다. 틀리면 필요 이상으로 큰 이미지를 받는다.
+
+**남은 경고 (그대로 둠)**
+- `React does not recognize the fetchPriority prop`: Next 13.5는 React 18.3 이상이면 `fetchPriority`(camelCase)를 넘기도록 짜여 있다(`client/image-component.js`의 `getDynamicProps`). 그런데 실제 React 18.3에는 이 지원이 들어가지 않았다(React 19에 들어감). dev 모드에서만 나오는 경고라 그대로 뒀다. 없애려면 React를 18.2.0으로 고정하면 된다. Next 14에서 다시 본다.
+- LCP `priority` 권장: 버전업과 관계없다.
+
+**결과**: type-check 에러 0개, smoke 12/12 통과
+
 ### 13 → 14
 
 | 어디서 | 무슨 일 | 찾아볼 키워드 |

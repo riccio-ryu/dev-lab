@@ -20,7 +20,16 @@ export default function Home({ posts, generatedAt }: Props) {
   return (
     <Layout title="홈">
       <h1>Next 10 블로그</h1>
-      <Image src="/logo.png" alt="로고" width={120} height={120} />
+      <Image
+        src="/logo.png"
+        alt="로고"
+        width={120}
+        height={120}
+        style={{
+          maxWidth: '100%',
+          height: 'auto',
+        }}
+      />
       <p>정적 생성 시각: {generatedAt}</p>
       <List>
         {posts.map((post) => (
