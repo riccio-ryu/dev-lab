@@ -26,15 +26,11 @@ export default function Home({ posts, generatedAt }: Props) {
         {posts.map((post) => (
           <li key={post.id}>
             {/* Next 12까지는 Link 안에 <a>를 직접 넣어야 한다 */}
-            <Link href={`/posts/${post.id}`}>
-              <a>{post.title}</a>
-            </Link>
+            <Link href={`/posts/${post.id}`}>{post.title}</Link>
           </li>
         ))}
         <li>
-          <Link href="/posts/999">
-            <a>없는 글 (404 확인용)</a>
-          </Link>
+          <Link href="/posts/999">없는 글 (404 확인용)</Link>
         </li>
       </List>
       <p>버전: {process.env.APP_VERSION}</p>

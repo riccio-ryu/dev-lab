@@ -39,16 +39,16 @@ const Layout = ({ title, children }: React.PropsWithChildren<Props>) => {
       </Head>
       <Nav>
         {/* styled 컴포넌트를 <a>로 쓰려면 passHref가 필요하다 */}
-        <Link href="/" passHref>
+        <Link href="/" passHref legacyBehavior>
           <NavLink>홈</NavLink>
         </Link>
-        <Link href="/ssr" passHref>
+        <Link href="/ssr" passHref legacyBehavior>
           <NavLink>SSR</NavLink>
         </Link>
-        <Link href="/client" passHref>
+        <Link href="/client" passHref legacyBehavior>
           <NavLink>CSR</NavLink>
         </Link>
-        <Link href="/gallery" passHref>
+        <Link href="/gallery" passHref legacyBehavior>
           <NavLink>갤러리</NavLink>
         </Link>
       </Nav>
