@@ -412,6 +412,30 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 - 공통 JS도 app은 87.4 kB, pages는 95.2 kB로 따로 계산된다.
 - `/gallery`의 First Load JS는 107 kB로 pages 때(102 kB)보다 크다. 아직 app 쪽은 페이지가 하나뿐이라 공통 chunk를 나눠 쓸 페이지가 없기 때문으로 보인다. 다 옮긴 뒤 다시 비교한다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) 3. `/client`
+
+- `app/client/page.tsx`: 서버 컴포넌트. `metadata`만 정하고 `ClientView`를 그린다.
+- `app/client/ClientView.tsx`: `'use client'`. `pages/client.tsx`의 `useState`, `useEffect`, `dynamic(ssr: false)`를 그대로 옮겼다.
+- page에 `'use client'`를 붙이면 `metadata`를 export할 수 없어서 둘로 나눴다. `/gallery`의 `Hero`와 같은 방식이다.
+
+**`'use client'`도 첫 HTML은 서버에서 그린다**
+- 서버 HTML에 `서버 시각: 불러오는 중...`과 `fetch 호출 횟수: 0`이 들어 있다.
+- 그래서 `window`를 쓰는 `WindowSize`는 App Router에서도 `dynamic(..., { ssr: false })`가 필요하다.
+
+**App Router의 `ssr: false`는 Suspense로 구현돼 있다**
+```html
+<!--$!--><template data-dgst="BAILOUT_TO_CLIENT_SIDE_RENDERING"></template><p>창 크기 계산 중...</p><!--/$-->
+```
+- "이 부분은 서버에서 그리지 않고 브라우저에 맡긴다"는 표시다. Pages Router에서는 로딩 문구만 그대로 들어갔다.
+
+**StrictMode**
+- App Router는 Next 13.4부터 StrictMode가 기본으로 켜져 있다.
+- 이 프로젝트는 `next.config.js`에 `reactStrictMode: false`를 적어 두었고, dev에서 fetch 호출 횟수는 **1**이었다. 설정에 직접 적은 값이 app에도 적용된다.
+
+**결과**
+- smoke 12/12. 서버 시각, 창 크기, fetch 횟수 모두 정상이다.
+- `/client`의 First Load JS: 100 kB(pages) → **88.8 kB**(app)
+
 ---
 
 ## 공식 문서
