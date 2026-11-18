@@ -56,6 +56,7 @@ npm run baseline       # 빌드 출력을 baseline/에 저장
 5. **12 → 13 (C. codemod)** (2026-11-19): `new-link`로 Link 안의 `<a>`를 없앴다. styled 컴포넌트를 자식으로 둔 `Layout`은 `legacyBehavior`로 미뤄 뒀다. Image는 `next-image-to-legacy-image`와 `next-image-experimental`을 차례로 돌려 새 Image로 바꿨다. codemod가 넣은 `sizes="100vw"`는 실제 레이아웃에 맞게 고쳤다. smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 12 → 13 C](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-c-codemod로-link와-image-고치기)
 6. **13 → 14** (2026-11-19): Node를 먼저 20으로 올리고 그다음 Next 14.2.35로 올렸다. 코드 수정 없이 빌드는 통과했다. `images.domains` 경고는 빌드가 아니라 실행 중에 나와서 `remotePatterns`로 바꿨다. 13에서 남았던 `fetchPriority` 경고는 14에서 사라졌다. smoke 12/12 통과. **1단계(Pages Router 유지) 완료.** 자세한 내용은 [UPGRADE_NOTES.md의 13 → 14](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-13511--14235)
 7. **2단계 1. API → Route Handler** (2026-11-19): `pages/api/*`를 `app/api/*/route.ts`로 옮겼다. Next 14에서 GET Route Handler는 기본으로 캐시돼서, `/api/time`이 빌드한 시각만 계속 돌려줬다. `force-dynamic`으로 해결했다. smoke는 두 경우 모두 통과해서 이 차이를 못 잡았다. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 1](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-1-api--route-handler)
+8. **2단계 2. 공통 뼈대 + `/gallery` + 404** (2026-11-19): `app/layout.tsx`와 styled-components registry, ThemeProvider를 만들고 `/gallery`를 옮겼다. `app/`이 생기자마자 없는 주소를 App Router가 처리해서 smoke 404 검사가 실패했다. 그래서 404도 바로 `app/not-found.tsx`로 옮겼다. `@types/styled-components`가 React 17 시절 타입이라 5.1.36으로 올렸다. smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 2단계 2](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-2-공통-뼈대--gallery--404)
 
 ## ✅ 결과 & 배운 점 ✍️
 -

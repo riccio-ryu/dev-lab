@@ -372,6 +372,46 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 - `tsconfig.json`에 `"plugins": [{ "name": "next" }]`와 `include`의 `".next/types/**/*.ts"`가 추가됐다.
 - `next-env.d.ts`의 문서 링크가 `pages/...`에서 `app/...`으로 바뀌었다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) 2. 공통 뼈대 + `/gallery` + 404
+
+| 새 파일 | 하는 일 | 대신하는 것 |
+|---|---|---|
+| `app/layout.tsx` | `<html>`, `<head>`(폰트 link), `<body>`, `globals.css`, 제목 template(`%s \| next-10-to-14`) | `_document`, `_app`, `Layout`의 `<title>` |
+| `lib/styled-registry.tsx` | 서버 렌더링 중에 만든 스타일을 `useServerInsertedHTML`로 HTML에 넣는다 | `_document`의 `ServerStyleSheet` |
+| `app/providers.tsx` | registry와 `ThemeProvider` (`'use client'`) | `_app`의 `ThemeProvider` |
+| `components/AppShell.tsx` | Nav, Main, RenderedAt (`'use client'`) | `components/Layout.tsx`. pages가 남아 있는 동안은 둘 다 둔다 |
+| `app/gallery/page.tsx` + `Hero.tsx` | 갤러리. page는 서버 컴포넌트, styled `Hero`만 클라이언트 파일로 뺐다 | `pages/gallery.tsx` |
+| `app/not-found.tsx` | 없는 주소 처리 | `pages/404.tsx` |
+
+**`'use client'` 경계**
+- styled-components는 Context를 쓰기 때문에 서버 컴포넌트에서 만들 수 없다. 그래서 `AppShell`과 `Hero`는 클라이언트 컴포넌트로 만들었다.
+- `metadata`는 서버 컴포넌트에서만 export할 수 있다. 그래서 page 전체를 `'use client'`로 만들지 않고, styled 부분만 별도 파일로 뺐다.
+
+**`legacyBehavior` 해결**
+- `AppShell`에서는 `NavLink = styled(Link)`로 만들었다. 빌드된 HTML에 `<a class="..." href="/">홈</a>`처럼 `<a>`가 하나만 나온다.
+
+**막힌 것**
+1. `Property 'clearTag' does not exist on type 'ServerStyleSheet'`
+   - `@types/styled-components` 5.x는 `instance`를 `this`(ServerStyleSheet 자신)로 적어 두었다. 실제 값은 내부 StyleSheet 객체라 `clearTag`가 있다.
+   - 타입을 직접 맞추는 한 줄을 넣었다. styled-components v6에서는 필요 없다.
+2. `StyleSheetManager`에 `children`을 넣을 수 없다는 에러
+   - React 18의 children 문제와 같은 원인이다. `@types/styled-components` 5.1.10에는 `children`이 빠져 있다.
+   - 5.1.36으로 올려서 해결했다. 사실 12 → 13의 React 18 단계에서 함께 올렸어야 하는 패키지였다. 그때는 `StyleSheetManager`를 직접 쓰지 않아서 드러나지 않았다.
+3. **smoke 11/12: `없는 페이지 (GET /nope)` 실패**
+   - `app/`이 생기면 Next가 `/_not-found`를 자동으로 만든다. 그때부터 어디에도 없는 주소는 `pages/404.tsx`가 아니라 App Router가 처리한다.
+   - 그래서 상태 코드는 404였지만 화면에는 Next 기본 문구(`This page could not be found`)가 나왔다.
+   - 마지막에 하려던 404를 지금 `app/not-found.tsx`로 옮겼다. ❓의 추천 순서에서 `/404`가 앞쪽에 있던 이유다.
+
+**결과**
+- smoke 12/12
+- `/gallery` 제목은 `갤러리 | next-10-to-14`, `/nope` 제목은 `404 | next-10-to-14`다.
+- `/gallery`의 HTML에 `data-styled` 스타일 태그가 들어 있다.
+- app과 pages 사이를 이동할 때는 페이지 전체를 새로 불러온다. 두 Router가 공유하지 않기 때문이다.
+
+**빌드 표가 둘로 나뉜다**: `Route (app)`과 `Route (pages)`가 따로 나온다.
+- 공통 JS도 app은 87.4 kB, pages는 95.2 kB로 따로 계산된다.
+- `/gallery`의 First Load JS는 107 kB로 pages 때(102 kB)보다 크다. 아직 app 쪽은 페이지가 하나뿐이라 공통 chunk를 나눠 쓸 페이지가 없기 때문으로 보인다. 다 옮긴 뒤 다시 비교한다.
+
 ---
 
 ## 공식 문서
