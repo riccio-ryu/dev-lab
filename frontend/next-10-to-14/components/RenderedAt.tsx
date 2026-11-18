@@ -9,5 +9,5 @@ const Footer = styled.footer`
 
 // 렌더링된 시각을 보여 주는 푸터
 export default function RenderedAt() {
-  return <Footer>렌더 시각: {new Date().toLocaleTimeString('ko-KR')}</Footer>
+  return <Footer suppressHydrationWarning>렌더 시각: {new Date().toLocaleTimeString('ko-KR')}</Footer>
 }

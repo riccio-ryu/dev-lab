@@ -60,7 +60,7 @@ Next만 올리면 끝나지 않는다. 각 단계에서 아래도 맞는 버전�
 - **깨진 곳**: `next build`가 `ValidationError: Invalid configuration object. Webpack has been initialized using a configuration object that does not match the API schema.`로 실패했다.
   - 원인: webpack 5는 `node` 옵션에 `fs: 'empty'` 같은 값을 받지 않는다. webpack 4 전용 문법이었다.
   - `npm run baseline`은 `tee`로 stdout만 저장하기 때문에 에러는 파일에 남지 않고 빌드 로그가 중간에 끊긴다.
-- **고친 방법**: `next.config.js`의 `webpack` 블록을 통째로 지웠다.
+- **고친 방법**: `next.config.js`의 `webpack` 블록을 통째로 주석 처리했다. 전후를 한눈에 비교하려고 지우지 않고 남겨 두었다.
   - 이유: `pages/`, `components/`, `lib/` 어디에서도 `fs`를 import하지 않는다. 클라이언트 번들에서 `fs`를 빈 모듈로 바꿀 일이 처음부터 없었고, 아무 일도 하지 않던 설정이었다. (❓의 답: 필요 없었다)
   - 정말 필요했다면 webpack 5에서는 `config.resolve.fallback = { ...config.resolve.fallback, fs: false }`로 쓴다.
   - 덤으로, 커스텀 webpack 설정이 없어졌으니 12 이후 버전업에서도 신경 쓸 곳이 하나 줄었다.
@@ -134,6 +134,38 @@ Next만 올리면 끝나지 않는다. 각 단계에서 아래도 맞는 버전�
 | 브라우저 | IE11 지원 중단 | |
 
 ❓ codemod를 돌리기 **전에** 커밋해 두면 좋은 이유는?
+
+#### ✅ 실제로 해 보니 (2026-11-19) A. React 18 먼저 (Next 12.3.7 그대로)
+
+Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 올리기 전에 React부터 올려 두었다. 이렇게 하면 에러가 React 때문인지 Next 때문인지 헷갈리지 않는다.
+
+**올린 것**: 노트에 적어 둔 대로 TS를 먼저 올렸다.
+- `typescript` 4.3.5 → 5.9.3
+- `@types/react` 17 → 18, `@types/react-dom` 17 → 18
+- `@types/node` 14 → 16: 실제로 쓰는 Node 16에 맞췄다. Node 20은 13 → 14에서 올린다.
+- `react`, `react-dom` 17.0.2 → 18.3.1
+
+**타입 에러: 8개, 원인은 하나**
+- `Property 'children' does not exist on type 'Props'`. `Layout.tsx`에서 1개, `Layout`을 쓰는 페이지 7개에서 각각 1개씩 났다.
+- `@types/react` 18부터 `React.FC`가 children을 자동으로 넣어 주지 않는다.
+- `Layout.tsx`의 `Props`에 `children: React.ReactNode`를 적어서 해결했다. 이전 코드는 비교하려고 주석으로 남겨 두었다.
+
+**하이드레이션: 경고가 에러로 바뀌었다**
+- React 17에서는 콘솔 경고(`Warning: Text content did not match`)였다. React 18 dev 모드에서는 `Unhandled Runtime Error: Text content does not match server-rendered HTML.` 오버레이가 뜬다.
+- 프로덕션에서도 React 18은 서버 HTML을 버리고 클라이언트에서 다시 그린다. smoke는 통과해도 그냥 두면 안 된다.
+- `RenderedAt`은 `Layout` 안에 있어서 모든 페이지에 들어간다. 그래서 서버와 브라우저가 그리는 사이에 "초"가 바뀌는 타이밍이면 어느 페이지에서든 에러가 났다. `/`와 `/client`에서 둘 다 확인했다.
+- 해결: `<Footer suppressHydrationWarning>`. 서버가 렌더링한 시각을 보여 주는 게 이 컴포넌트의 목적이라, `useEffect`로 클라이언트에서만 그리는 대신 이 방법을 골랐다.
+
+**결과**
+- type-check 에러 0개, smoke 12/12 통과
+- `/client`의 fetch 호출 횟수는 1이다. `reactStrictMode: false`라서 그렇다.
+- 공통 JS: 90.4 kB → 93.6 kB. `framework` chunk(React 본체)가 42 kB → 45.2 kB로 커졌다.
+- `baseline/build-next12.3.7-react18.txt`에 저장했다. Next 버전이 같아서 `npm run baseline`을 쓰면 기존 파일을 덮어쓰기 때문에 `npm run build | tee ...`로 따로 저장했다.
+- `tsconfig.json`: TS 5로 바꾼 뒤 처음 빌드할 때 Next가 `"incremental": true`를 자동으로 추가했다.
+
+**덤: 포맷 문제**
+- 저장할 때 에디터가 자동으로 포맷해서 파일 전체가 큰따옴표와 세미콜론 스타일로 바뀌었다. 그 바람에 바꾼 줄이 diff에 묻혔다.
+- `.prettierrc`(`singleQuote`, `semi: false`, `printWidth: 120`)를 추가하고 원래 스타일로 되돌렸다.
 
 ### 13 → 14
 

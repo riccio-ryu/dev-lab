@@ -49,8 +49,9 @@ npm run baseline       # 빌드 출력을 baseline/에 저장
 ```
 
 ## 🔬 해본 것 ✍️
-1. **10 → 11** (2026-11-18): webpack 5에서 `config.node = { fs: 'empty' }` 때문에 빌드가 실패했다. 쓰는 곳이 없는 설정이라 `webpack` 블록을 지웠고, smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 10 → 11](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1023--1114)
+1. **10 → 11** (2026-11-18): webpack 5에서 `config.node = { fs: 'empty' }` 때문에 빌드가 실패했다. 쓰는 곳이 없는 설정이라 `webpack` 블록을 주석 처리했고, smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 10 → 11](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1023--1114)
 2. **11 → 12** (2026-11-18): `.babelrc`가 있으면 SWC가 꺼진다. `.babelrc`를 지우고 `compiler.styledComponents`로 옮겼더니 SSR과 displayName 모두 그대로 동작했고, smoke 12/12 통과. 그런데 공통 JS는 87.9 kB에서 90.4 kB로 오히려 늘었다. 자세한 내용은 [UPGRADE_NOTES.md의 11 → 12](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-18-1114--1237)
+3. **12 → 13 (A. React 18 먼저)** (2026-11-19): Next 12에 그대로 있으면서 TS 5와 React 18을 먼저 올렸다. `React.FC`가 children을 자동으로 넣어 주지 않아서 타입 에러 8개가 났고, `Props`에 `children`을 적어서 해결했다. 하이드레이션 경고가 에러로 바뀌어서 `RenderedAt`에 `suppressHydrationWarning`을 붙였다. smoke 12/12 통과. 자세한 내용은 [UPGRADE_NOTES.md의 12 → 13](./UPGRADE_NOTES.md#-실제로-해-보니-2026-11-19-a-react-18-먼저-next-1237-그대로)
 
 ## ✅ 결과 & 배운 점 ✍️
 -

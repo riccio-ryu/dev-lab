@@ -24,10 +24,14 @@ const Main = styled.main`
 
 type Props = {
   title: string
+  children: React.ReactNode
 }
 
 // React 17 타입에서는 React.FC가 children을 암묵적으로 포함한다.
-const Layout: React.FC<Props> = ({ title, children }) => {
+// const Layout: React.FC<Props> = ({ title, children }) => {
+
+// React 18 타입부터는 React.FC가 children을 자동으로 넣어 주지 않는다. Props에 직접 적는다.
+const Layout = ({ title, children }: React.PropsWithChildren<Props>) => {
   return (
     <>
       <Head>
