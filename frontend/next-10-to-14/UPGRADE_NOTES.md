@@ -85,6 +85,41 @@ Next만 올리면 끝나지 않는다. 각 단계에서 아래도 맞는 버전�
 
 ❓ `.babelrc`를 지웠을 때 styled-components SSR이 그대로 동작하는지는 어떻게 확인할까? (힌트: smoke의 `data-styled` 검사, 그리고 dev 모드 콘솔의 className 경고)
 
+#### ✅ 실제로 해 보니 (2026-11-18, 11.1.4 → 12.3.7)
+
+두 번에 나눠 진행했다. Next 12.3.7은 Node 12.22 이상과 React 17.0.2 또는 18을 요구해서 Node와 React는 그대로 뒀다.
+
+**A. Next만 올리기**: 빌드와 smoke 모두 그대로 통과했다.
+- 빌드 로그에 `Disabled SWC as replacement for Babel because of custom Babel configuration ".babelrc"`가 찍혔다. `.babelrc`가 있으면 Next 12는 SWC를 끄고 Babel을 계속 쓴다.
+- 결과 파일: `baseline/build-next12.3.7-babel.txt`
+  - B에서 버전이 같아 `npm run baseline`이 같은 파일 이름으로 덮어쓰기 때문에 이름을 바꿔 두었다.
+
+**B. SWC로 바꾸기**
+- `.babelrc`를 지우고, `next.config.js`에 `compiler: { styledComponents: true }`를 추가했다.
+  - `.babelrc`에 있던 `ssr: true`, `displayName: true`는 SWC에서 기본으로 켜져 있다.
+- `babel-plugin-styled-components`를 제거했다.
+- 확인 결과
+  - 빌드 로그에서 `Disabled SWC` 줄이 사라졌다.
+  - smoke 12/12 통과 (`data-styled` 검사 포함)
+  - dev 콘솔에 ``Prop `className` did not match`` 경고가 없다. 서버와 브라우저의 styled-components 클래스 이름이 같다는 뜻이다.
+  - 클래스 이름이 `Layout__Nav-sc-6183e77a-0`처럼 나와서 displayName도 동작한다.
+- `next-env.d.ts`: `next/types/global` 참조를 Next가 자동으로 지웠다.
+
+**번들 크기 (공통 First Load JS)**
+
+| 11.1.4 | 12.3.7 Babel | 12.3.7 SWC |
+|---|---|---|
+| 81.4 kB | 87.9 kB | 90.4 kB |
+
+- 11 → 12에서 늘어난 6.5 kB는 주로 `main` chunk에서 왔다 (23.4 → 29.6 kB).
+- SWC로 바꾸자 오히려 2.5 kB가 늘었다. Next 12의 SWC는 코드 변환만 맡고 압축은 여전히 Terser가 한다 (`swcMinify`는 13부터 기본). 늘어난 정확한 이유는 아직 확인하지 않았다.
+
+**dev 콘솔에서 새로 본 것**: `Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP)`.
+- 화면 위쪽의 큰 이미지에 `priority`를 붙이라는 권장으로, 12에서 새로 생겼다.
+- 버전업과는 관계없어서 그대로 뒀다.
+
+**놓칠 뻔한 것**: `npm run dev`를 실행하면 `.next`가 dev용으로 덮어써진다. dev로 콘솔을 확인한 뒤 smoke를 돌릴 때는 `npm run build`부터 다시 해야 한다. 프롬프트 시각을 보니 처음 돌린 smoke는 SWC로 바꾸기 전 서버에서 돌린 결과였다.
+
 ### 12 → 13 ⚠️ 가장 많이 깨지는 단계
 
 | 어디서 | 무슨 일 | 찾아볼 키워드 |

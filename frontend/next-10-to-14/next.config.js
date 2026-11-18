@@ -3,6 +3,11 @@
 module.exports = {
   reactStrictMode: false,
 
+  // .babelrc의 babel-plugin-styled-components를 SWC 내장 기능으로 대체
+  compiler: {
+    styledComponents: true,
+  },
+
   images: {
     // 외부 이미지 허용 방식 (next/image)
     domains: ["picsum.photos"],
