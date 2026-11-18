@@ -436,6 +436,34 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 - smoke 12/12. 서버 시각, 창 크기, fetch 횟수 모두 정상이다.
 - `/client`의 First Load JS: 100 kB(pages) → **88.8 kB**(app)
 
+#### ✅ 실제로 해 보니 (2026-11-19) 4. `/` (홈)
+
+- `app/page.tsx`: 서버 컴포넌트. `getStaticProps` 없이 `getAllPosts()`와 `new Date()`를 함수 안에서 바로 호출한다.
+- `app/List.tsx`: styled `ul` (`'use client'`)
+- 이제 smoke의 `styled-components SSR` 검사(`/`의 `data-styled`)가 app 쪽 registry를 검증한다. 통과했다.
+
+**`getStaticProps` 없이도 SSG다**
+- 빌드 표에 `/`가 `○ (Static)`으로 나온다.
+- 프로덕션에서 두 번 요청해도 "정적 생성 시각"이 같았다(`2026-11-18T16:32:54.243Z`).
+- `headers()`나 `cookies()` 같은 동적 함수를 쓰지 않으면 기본으로 정적 페이지가 된다. API(Route Handler)와 같은 규칙이다.
+- dev에서는 요청마다 렌더링해서 새로고침할 때마다 값이 바뀐다.
+
+**함정: `title.template`은 같은 폴더의 page에는 적용되지 않는다**
+- `app/layout.tsx`의 template(`%s | next-10-to-14`)은 **자식 폴더**의 page에만 적용된다.
+- `app/page.tsx`는 layout과 같은 폴더라서 `title: '홈'`이라고 쓰면 제목이 `홈` 하나로만 나왔다. `/gallery`는 `app/gallery/` 안이라서 적용됐다.
+- 홈만 `'홈 | next-10-to-14'`로 전체 제목을 직접 적었다.
+- smoke는 제목을 검사하지 않아서 이번에도 못 잡았다. `curl`로 `<title>`을 직접 확인했다.
+
+**RSC payload**
+- 서버 HTML 아래쪽 `<script>`(`self.__next_f.push`) 안에 `"href":"/posts/1","children":"Next 10 시작하기"` 같은 내용이 한 번 더 들어 있다.
+- 서버 컴포넌트의 결과를 브라우저의 React에 전달하는 데이터다. Pages Router의 `__NEXT_DATA__`(props)와 비슷한 역할이다.
+
+**번들: 홈은 오히려 커졌다**
+- `/`의 First Load JS: 102 kB(pages) → **116 kB**(app)
+- `/client`는 줄었는데 홈은 늘었다. `Image`, `Link`, styled 컴포넌트 같은 클라이언트 컴포넌트가 App Router 런타임에 추가된 것으로 보인다. 원인은 아직 확인하지 않았다. 다 옮긴 뒤 `@next/bundle-analyzer`로 본다.
+
+**결과**: smoke 12/12. dev에서 스타일, 로고, 제목 모두 예전과 같다.
+
 ---
 
 ## 공식 문서
