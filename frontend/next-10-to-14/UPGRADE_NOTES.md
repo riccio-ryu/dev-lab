@@ -506,6 +506,33 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 
 **결과**: smoke 12/12, `/posts/999` → 404
 
+#### ✅ 실제로 해 보니 (2026-11-19) 6. `/ssr`
+
+| Pages Router | App Router |
+|---|---|
+| `getServerSideProps` | 없음. page 서버 컴포넌트 안에서 바로 처리 |
+| `req.headers['user-agent']` | `headers().get('user-agent')` |
+| `query.login === '0'` | `searchParams.login === '0'` |
+| `return { redirect: { destination: '/', permanent: false } }` | `redirect('/')` |
+
+**요청마다 렌더링된다. 따로 설정할 필요가 없었다** (빌드 표에 `ƒ /ssr`)
+```
+요청 시각: 2026-11-18T16:46:28.748Z   User-Agent: smoke-test/1
+요청 시각: 2026-11-18T16:46:29.791Z   User-Agent: smoke-test/2
+```
+- API는 `force-dynamic`이 필요했고, 홈은 Static이 됐다. `/ssr`은 `headers()`와 `searchParams`를 쓰는 것만으로 Next가 자동으로 동적 페이지로 만들었다.
+- **App Router의 규칙: 요청 정보(`headers`, `cookies`, `searchParams`)를 읽으면 동적, 안 읽으면 정적.** Pages Router는 어떤 함수를 export하느냐(`getStaticProps`인지 `getServerSideProps`인지)로 정했다.
+
+**`redirect()`는 307이다**
+- `HTTP/1.1 307 Temporary Redirect`, `Location: /`로 `getServerSideProps`의 `permanent: false`와 같다. 그래서 smoke가 그대로 통과했다.
+- `/posts/999` 실험과 같은 이유로, `loading.tsx`가 있으면 상태 코드가 이미 200으로 정해진 뒤에 리다이렉트가 일어나게 된다.
+
+**결과**
+- smoke 12/12
+- dev에서 새로고침할 때마다 요청 시각이 바뀐다. `/ssr?login=0`은 홈으로 이동한다.
+- 모든 페이지가 app으로 옮겨져서 메뉴 이동에 전체 새로고침이 없다.
+- `pages/`에는 `_app.tsx`와 `_document.tsx`만 남았다. `components/Layout.tsx`는 더 이상 쓰는 곳이 없다.
+
 ---
 
 ## 공식 문서
