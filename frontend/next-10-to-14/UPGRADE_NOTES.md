@@ -338,6 +338,40 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 
 ❓ 추천 이전 순서: API → 정적 페이지(`/404`, `/gallery`) → `/client` → `/` → `/posts/[id]` → `/ssr` → 마지막에 `_app`/`_document` 제거. 왜 이 순서일까?
 
+### 2단계 진행 방식 (2026-11-19)
+
+- **예전 파일은 지우고 git으로 비교한다.** `pages/` 안의 파일은 있기만 해도 경로가 된다. 주석으로 남기면 "default export가 없다"는 에러가 나고, `app/`에 같은 경로가 있으면 충돌한다.
+  - 1단계 끝 지점에 `next14-pages` 태그를 달았다.
+  - 비교는 `git diff next14-pages -- pages/<파일> app/<폴더>`로 한다.
+- **실제 순서**: API를 맨 먼저 했다. 화면이 없어서 styled-components나 레이아웃과 상관없이 혼자 옮길 수 있기 때문이다. 페이지를 옮기기 전에는 `app/layout.tsx`와 styled-components registry를 먼저 준비해야 한다.
+
+#### ✅ 실제로 해 보니 (2026-11-19) 1. API → Route Handler
+
+| Pages Router (`pages/api/time.ts`) | Route Handler (`app/api/time/route.ts`) |
+|---|---|
+| `handler(req, res)` 하나에서 `req.method`로 나눔 | 메서드마다 함수를 따로 export (`GET`, `POST` ...) |
+| `res.status(200).json(...)` | 웹 표준 `Response.json(...)` 반환 |
+| 405를 직접 처리 (`Allow` 헤더 포함) | 없는 메서드는 Next가 405를 자동으로 돌려준다. `/api/posts`는 `GET`만 만들었다 |
+| 요청마다 실행 | **GET은 기본으로 정적(캐시)** |
+
+**함정: GET Route Handler는 기본으로 캐시된다 (Next 14)**
+- `export const dynamic = 'force-dynamic'` 없이 빌드하고 `curl`을 2초 간격으로 두 번 요청했다.
+  ```
+  {"now":"2026-11-18T16:13:01.013Z"}
+  {"now":"2026-11-18T16:13:01.013Z"}   ← 같다. 빌드한 시각(01:13 KST)이 그대로 나온다
+  ```
+- `force-dynamic`을 켜고 다시 빌드했다.
+  ```
+  {"now":"2026-11-18T16:16:22.998Z"}
+  {"now":"2026-11-18T16:16:25.045Z"}   ← 2초 차이. 요청마다 실행된다
+  ```
+- **smoke는 두 경우 모두 12/12 통과했다.** `"now"`라는 글자가 있는지만 검사해서 동작이 몰래 바뀐 걸 못 잡는다. 옮길 때는 "요청마다 달라져야 하는 값"을 직접 확인해야 한다.
+- `/api/posts`는 고정 데이터라 캐시돼도 괜찮아서 그대로 뒀다.
+
+**Next가 자동으로 바꾼 것** (처음으로 `app/`을 빌드할 때)
+- `tsconfig.json`에 `"plugins": [{ "name": "next" }]`와 `include`의 `".next/types/**/*.ts"`가 추가됐다.
+- `next-env.d.ts`의 문서 링크가 `pages/...`에서 `app/...`으로 바뀌었다.
+
 ---
 
 ## 공식 문서
