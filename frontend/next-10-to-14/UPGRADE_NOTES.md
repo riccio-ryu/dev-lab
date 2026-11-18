@@ -533,6 +533,49 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 - 모든 페이지가 app으로 옮겨져서 메뉴 이동에 전체 새로고침이 없다.
 - `pages/`에는 `_app.tsx`와 `_document.tsx`만 남았다. `components/Layout.tsx`는 더 이상 쓰는 곳이 없다.
 
+#### ✅ 실제로 해 보니 (2026-11-19) 7. 정리
+
+- `pages/_app.tsx`, `pages/_document.tsx`, `components/Layout.tsx`를 지웠다. 이제 `pages/` 폴더가 없다.
+- 빌드 표에서 `Route (pages)`가 사라지고 `Route (app)`만 남았다. → `baseline/build-next14.2.35-app.txt`
+- `next-env.d.ts`: pages와 app이 섞여 있을 때만 쓰던 `next/navigation-types/compat/navigation` 참조를 Next가 자동으로 지웠다.
+- 결과: smoke 12/12, `/posts/999` → 404, `/`의 HTML에 `data-styled`가 들어 있다.
+
+## 최종 정리: Next 10 Pages Router → Next 14 App Router
+
+**페이지별 First Load JS**
+
+| 페이지 | Next 10 (Pages) | Next 14 (Pages) | Next 14 (App) |
+|---|---|---|---|
+| 공통 | 78.5 kB | 95 kB | 87.4 kB |
+| `/` | 85.8 kB | 102 kB | 116 kB |
+| `/client` | 85.6 kB | 99.9 kB | 88.8 kB |
+| `/gallery` | 85.7 kB | 102 kB | 107 kB |
+| `/posts/[id]` | 82.9 kB | 98.3 kB | 87.5 kB |
+| `/ssr` | 82.9 kB | 98.3 kB | 87.5 kB |
+| 404 | 82.9 kB | 98.3 kB | 87.5 kB |
+
+- 1단계(Next 10 → 14, Pages 유지)에서는 모든 페이지가 약 16 kB씩 커졌다.
+- 2단계(App Router)에서는 클라이언트 컴포넌트가 거의 없는 페이지(`/posts/[id]`, `/ssr`, 404)가 약 11 kB 줄었다. 서버 컴포넌트는 브라우저로 JS를 보내지 않기 때문이다.
+- 반대로 `Image`, `Link`, styled 컴포넌트를 쓰는 `/`와 `/gallery`는 Pages 때보다 더 커졌다. 원인은 아직 확인하지 않았다(`@next/bundle-analyzer`로 볼 것).
+
+**`/posts/999`(없는 글)의 응답**
+
+| Next 10 ~ 14 (Pages) | Next 14 (App) |
+|---|---|
+| 200 + "로딩 중" → 브라우저에서 404 | **404** (`loading.tsx`를 넣으면 다시 200) |
+
+**smoke가 못 잡은 것들** (12/12인데도 동작이 달랐던 경우)
+1. Next 13: `<a>` 안에 `<a>`가 생겼다 (Link)
+2. App Router: `/api/time`이 빌드 시각을 캐시했다 (`force-dynamic`)
+3. App Router: 홈 제목이 `홈`으로만 나왔다 (`title.template`)
+4. App Router: `loading.tsx`를 넣으면 `/posts/999`가 다시 200이 됐다
+
+smoke에 검사를 추가하면 다음 버전업(15 등)에서 같은 실수를 막을 수 있다.
+- `<a` 중첩
+- `/api/time` 두 번 요청해서 값이 다른지
+- `<title>` 값
+- `/posts/999` 상태 코드
+
 ---
 
 ## 공식 문서
