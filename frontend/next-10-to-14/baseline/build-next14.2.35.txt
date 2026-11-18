@@ -1,0 +1,40 @@
+
+> build
+> next build
+
+  ▲ Next.js 14.2.35
+
+   Linting and checking validity of types ...
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Collecting page data ...
+   Generating static pages (0/7) ...
+   Generating static pages (1/7) 
+   Generating static pages (3/7) 
+   Generating static pages (5/7) 
+ ✓ Generating static pages (7/7)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (pages)                               Size     First Load JS
+┌ ● /                                       1.14 kB         102 kB
+├   /_app                                   0 B            94.9 kB
+├ ○ /404                                    924 B          98.3 kB
+├ ƒ /api/posts                              0 B            94.9 kB
+├ ƒ /api/time                               0 B            94.9 kB
+├ ○ /client                                 2.59 kB        99.9 kB
+├ ○ /gallery                                1.14 kB         102 kB
+├ ● /posts/[id] (ISR: 60 Seconds) (326 ms)  980 B          98.3 kB
+├   └ /posts/1
+└ ƒ /ssr                                    951 B          98.3 kB
++ First Load JS shared by all               95 kB
+  ├ chunks/framework-64ad27b21261a9ce.js    44.8 kB
+  ├ chunks/main-fc56ac81e639fb5e.js         34 kB
+  ├ chunks/pages/_app-e4d4bd4be25b642d.js   14.4 kB
+  └ other shared chunks (total)             1.66 kB
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses getStaticProps)
+   (ISR)      incremental static regeneration (uses revalidate in getStaticProps)
+ƒ  (Dynamic)  server-rendered on demand
+

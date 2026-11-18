@@ -245,7 +245,70 @@ Next 12.3.7은 React 17과 18을 둘 다 지원한다. 그래서 Next 13으로 �
 | `@next/font` | 패키지 제거 | `next/font` |
 | `next export` | 명령어 제거 (이 프로젝트는 안 쓰지만 알아 두기) | `output: 'export'` |
 
+#### ✅ 실제로 해 보니 (2026-11-19, 13.5.11 → 14.2.35)
+
+**Node를 먼저, Next는 그다음에**: Node 때문에 생긴 문제인지 Next 때문에 생긴 문제인지 구분하려고 순서를 나눴다.
+1. Node 바꾸기
+   - `.nvmrc`를 16.14.2 → 20.12.2로 바꾸고 `@types/node`를 20으로 올렸다.
+   - `node_modules`를 지우고 다시 설치한 뒤, Next 13 그대로 빌드가 되는지 먼저 확인했다.
+2. `next@14.2.35`로 올렸다. 코드 수정 없이 빌드와 smoke가 통과했다.
+
+**`nvm`에서 헷갈린 것**
+- `.nvmrc`는 "이 프로젝트는 이 버전을 쓴다"는 메모일 뿐이다. `nvm use`를 실행해야 실제로 바뀌고, 바뀐 버전도 그 터미널에서만 유지된다.
+- 이 맥의 기본 Node는 24다. 그래서 새 터미널을 열면 매번 `nvm use`를 해야 한다. smoke를 돌리는 터미널도 마찬가지다.
+
+**`images.domains` 경고: 빌드가 아니라 실행 중에 나온다**
+- 빌드 로그에는 경고가 없었다. 처음에는 `server/config.js`만 보고 "14.2.35에는 경고가 없다"고 잘못 판단했다.
+- 실제 경고 `⚠ The "images.domains" configuration is deprecated`는 `server/image-optimizer.js`에 있었다. 서버가 외부 이미지를 처음 최적화할 때 한 번 나온다. dev에서 `/gallery`를 열었을 때 찍혔다.
+- 고친 것: `remotePatterns: [{ protocol: 'https', hostname: 'picsum.photos', pathname: '/id/**' }]`. 예전 `domains`는 주석으로 남겼다.
+- `domains`는 도메인만 맞으면 모든 경로를 허용한다. `remotePatterns`는 경로까지 좁힐 수 있다. `curl`로 확인했다.
+  - `/_next/image?url=https://picsum.photos/id/1015/...` → **200**
+  - `/_next/image?url=https://picsum.photos/200` → **400** (`/id/**` 밖이라 거부)
+
+**`fetchPriority` 경고가 사라졌다 (13에서 미뤄 둔 것)**
+- Next 14.2의 `image-component.js`는 "React 19 이상(`React.use`가 있는지)"을 기준으로 camelCase 속성을 보낸다.
+- React 18.3.1에서는 소문자 `fetchpriority`를 보내서 경고가 없다. React를 18.2로 고정할 필요가 없어졌다.
+
+**서버 터미널의 `title` 경고 (버전업과 직접 관계없음)**
+- `Warning: A title element received an array with more than 1 element as children`이 요청마다 찍혔다.
+- 원인: `<title>{title} | next-10-to-14</title>`의 children이 `['홈', ' | next-10-to-14']` 배열이 된다.
+- 해결: `` <title>{`${title} | next-10-to-14`}</title> ``로 문자열 하나로 합쳤다.
+- 브라우저 콘솔이 아니라 **서버 터미널**에만 찍혀서 지금까지 놓쳤다. React 18.3에서 생긴 경고라 13에서도 나왔을 가능성이 크다.
+
+**무시해도 되는 것**
+- `GET /_next/webpack-hmr?page=%2Fclient 404`: 이전 dev 서버 때부터 열려 있던 탭이 다시 연결하려는 요청이다.
+- `GET /.well-known/appspecific/com.chrome.devtools.json 404`: Chrome 개발자 도구가 자동으로 보내는 요청이다.
+
+**그 밖에 바뀐 것**
+- 빌드 표의 `λ (Server)`가 `ƒ (Dynamic)`으로 바뀌었다. 기호와 이름만 바뀌고 의미는 같다.
+- `next-env.d.ts`: 안내 주석의 문서 링크를 Next가 자동으로 바꿨다.
+
+**놓칠 뻔한 것**: smoke 결과를 두 번이나 이전 상태에서 복사했다. 프롬프트 시각을 빌드와 파일 수정 시각과 비교해서 알아챘다. smoke는 **마지막 빌드 이후에** 돌린 결과인지 꼭 확인한다.
+
+**결과**: type-check 에러 0개, smoke 12/12 통과 (Next 14.2.35 + Node 20.12.2)
+
 ### 버전마다 관찰할 것
+
+#### ✅ 1단계를 마치고 정리 (2026-11-19)
+
+**`/posts/999`(없는 글)는 14에서도 `200` + "로딩 중"이다.**
+- `fallback: true`일 때 처음 요청하면 일단 로딩 화면을 보낸다. 이 동작은 Pages Router에서는 10부터 14까지 그대로다.
+- 브라우저에서는 그다음에 데이터를 받아 `notFound`를 처리한다. `curl`처럼 JS를 실행하지 않으면 로딩 화면만 보인다.
+- App Router로 옮기면 바뀌는 지점이다 (`dynamicParams`, `notFound()`).
+
+**공통 First Load JS**
+
+| 단계 | 크기 | 주로 늘어난 곳 |
+|---|---|---|
+| 10.2.3 | 78.5 kB | |
+| 11.1.4 | 81.4 kB | webpack 5가 chunk를 나누는 방식이 바뀜 |
+| 12.3.7 (Babel) | 87.9 kB | `main` (Next 런타임) |
+| 12.3.7 (SWC) | 90.4 kB | `main`. SWC로 바꿨는데 오히려 늘었다 |
+| 12.3.7 + React 18 | 93.6 kB | `framework` (React 본체) |
+| 13.5.11 | 94.6 kB | |
+| 14.2.35 | 95 kB | |
+
+- 10 → 14에서 **+16.5 kB(약 21%)** 늘었다. 가장 많이 늘어난 건 Next 12로 올린 것(+6.5)과 React 18(+3.2)이다.
 
 - `/posts/999`(없는 글)를 `curl -i`로 요청해 보기. Next 10에서는 `fallback: true` 때문에 **첫 응답이 200 + "로딩 중" 화면**이다. 버전이 올라가면서 바뀌는가?
 - `baseline/build-*.txt`에서 First Load JS 크기가 어떻게 변하는가? (SWC, React 18 영향)

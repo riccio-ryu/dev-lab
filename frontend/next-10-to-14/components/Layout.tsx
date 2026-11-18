@@ -35,7 +35,9 @@ const Layout = ({ title, children }: React.PropsWithChildren<Props>) => {
   return (
     <>
       <Head>
-        <title>{title} | next-10-to-14</title>
+        {/* <title>{title} | next-10-to-14</title> */}
+        {/* JSX에서 {title}과 글자를 섞으면 children이 배열 ['홈', ' | next-10-to-14']이 된다. title은 글자 하나만 받으므로 문자열로 합친다 */}
+        <title>{`${title} | next-10-to-14`}</title>
       </Head>
       <Nav>
         {/* styled 컴포넌트를 <a>로 쓰려면 passHref가 필요하다 */}

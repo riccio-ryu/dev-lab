@@ -10,7 +10,8 @@ module.exports = {
 
   images: {
     // 외부 이미지 허용 방식 (next/image)
-    domains: ['picsum.photos'],
+    // domains: ['picsum.photos'],
+    remotePatterns: [{ protocol: 'https', hostname: 'picsum.photos', pathname: '/id/**' }],
   },
 
   env: {
