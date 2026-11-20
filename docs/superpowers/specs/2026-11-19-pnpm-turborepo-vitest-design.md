@@ -27,6 +27,14 @@
 - E2E(Playwright·Cypress), Storybook, 패키지 npm 배포(changesets), 원격 캐시(Vercel Remote Cache).
 - 실제 커머스 기능(장바구니 상태 저장, API). 화면은 부품이 연결된 걸 보여 주는 한 페이지면 충분하다.
 
+**나중에 할 것** (9-2 CI가 끝난 뒤, 2026-11-21 사용자 요청)
+- 한 모노레포 안에서 Vue와 React를 오가며 써 본다.
+- 방식
+  - `apps/vue-shop`(Vite + Vue 3)을 추가한다. `@lab/utils`만 `workspace:*`로 가져다 쓴다.
+  - `@lab/ui`는 React라서 쓰지 않는다. utils만 빌드하는 이유가 여기서 드러난다.
+  - turbo가 utils를 먼저 빌드한 뒤 web과 vue-shop을 동시에 빌드하는지 확인한다.
+- 범위: lint와 build만 붙인다. Vue 컴포넌트 테스트는 그때 정한다.
+
 **실패로 보는 것** (돌아가도 실패)
 - 테스트 코드를 직접 쓰지 않아서, 왜 그 케이스를 골랐는지 설명하지 못하는 경우.
 - 11/24를 넘기는 경우. 넘길 것 같으면 범위를 줄인다(8장 참고).
