@@ -41,7 +41,10 @@
 
 ## 3. 제약
 
-- Node 24(로컬). `.nvmrc`는 두지 않고, `package.json`의 `engines`와 CI의 Node 버전으로 맞춘다.
+- Node 24.15.0. `.nvmrc`, `package.json`의 `engines`, CI의 Node 버전을 모두 24로 맞춘다.
+  - 처음에는 `.nvmrc`를 두지 않기로 했다. 하지만 Task 2 직후 다른 터미널에서 `pnpm: command not found`가 났다(2026-11-21).
+  - 원인: 그 터미널은 next-10-to-14 작업 때 `nvm use 20.12.2`로 바꿔 둔 상태였다. `corepack enable pnpm`은 실행할 때 쓰던 Node(24.15.0)의 bin 폴더에만 `pnpm` 링크를 만든다. 그래서 Node 20에는 pnpm이 없었다.
+  - 그래서 `.nvmrc`에 `24.15.0`을 적었다. 폴더를 오갈 때 `nvm use`만 치면 맞는 Node로 바뀐다.
 - pnpm은 설치하지 않고 corepack으로 켠다. 루트 `package.json`에 `packageManager: "pnpm@<버전>"`을 적는다.
 - dev-lab은 공개 저장소이고 아직 워크플로가 없다. 워크플로는 저장소 루트의 `.github/workflows/`에만 둘 수 있다.
 - 커밋과 푸시는 사용자가 한다. Claude는 커밋 메시지와 스테이징할 파일만 제안한다.

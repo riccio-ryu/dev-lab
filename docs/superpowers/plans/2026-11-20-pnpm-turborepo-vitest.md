@@ -20,7 +20,7 @@
 - 모든 경로는 `build-tools/pnpm-turborepo-vitest/` 기준이다(워크플로 파일만 저장소 루트).
 - 패키지 이름: 루트 `pnpm-turborepo-vitest`(private), `@lab/web`, `@lab/ui`, `@lab/utils`. 패키지끼리는 `workspace:*`로 의존한다.
 - TypeScript는 `~5.9.3`으로 고정한다. 나머지는 설치할 때의 최신 안정판을 쓰고, 서로 맞지 않으면 한 단계 낮춘다.
-- Node 24. 루트 `engines.node: ">=24"`. `.nvmrc`는 두지 않는다.
+- Node 24. 루트 `engines.node: ">=24"`, `.nvmrc`는 `24.15.0`이다. 원래는 두지 않기로 했지만 터미널마다 Node 버전이 달라 `pnpm`을 찾지 못한 일이 있어서 추가했다(설계 문서 3장).
 - pnpm은 corepack으로 켠다. 루트에 `packageManager: "pnpm@<설치 시 버전>"`을 적는다.
 - Prettier는 `{ "singleQuote": true, "semi": false, "printWidth": 120 }`이다.
 - 코드 스타일
