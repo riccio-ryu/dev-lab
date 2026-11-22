@@ -1,11 +1,11 @@
 name: pnpm-turborepo-vitest
 
-# 이 실험 폴더(또는 이 파일)가 바뀔 때만 돈다. dev-lab의 다른 실험에는 영향이 없다
+# main 브랜치 보호 규칙이 check를 필수로 요구한다.
+# pull_request에 paths를 걸면 다른 실험만 고친 PR에서는 check가 아예 안 떠서 머지가 영영 막힌다.
+# 그래서 PR은 항상 돌리고, changes job에서 이 폴더가 바뀌었는지 보고 check를 돌리거나 건너뛴다.
+# 건너뛴(skipped) job은 필수 체크에서 통과로 친다.
 on:
   pull_request:
-    paths:
-      - 'build-tools/pnpm-turborepo-vitest/**'
-      - '.github/workflows/pnpm-turborepo-vitest.yml'
   push:
     branches: [main]
     paths:
@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 # 같은 PR에 새로 푸시하면 이전 실행은 취소한다
 concurrency:
@@ -21,7 +22,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      lab: ${{ steps.filter.outputs.lab }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            lab:
+              - 'build-tools/pnpm-turborepo-vitest/**'
+              - '.github/workflows/pnpm-turborepo-vitest.yml'
+
   check:
+    needs: changes
+    if: needs.changes.outputs.lab == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
