@@ -1,0 +1,11 @@
+.main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
