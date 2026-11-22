@@ -65,24 +65,83 @@ pnpm-turborepo-vitest/
 | `lint`  | 없음                                    | 없음 (로그만)         |
 | `dev`   | 없음                                    | 캐시 안 함            |
 
-## 🔬 해본 것 ✍️
+## 🚦 CI 품질 게이트
 
-1.
+- 워크플로: [`.github/workflows/pnpm-turborepo-vitest.yml`](../../.github/workflows/pnpm-turborepo-vitest.yml)
+  - 이 폴더가 바뀐 PR과 main push에서만 `pnpm turbo run lint test build`를 돈다.
+- main에는 브랜치 보호 규칙(Ruleset)을 걸었다.
+  - PR을 거쳐야만 머지할 수 있다.
+  - `check`가 통과해야 머지할 수 있다.
 
-<!--
-메모: 직접 정리할 재료 (Task 4에서 잰 값, 2026-11-21, `pnpm turbo run lint build`)
-- 1회차 (dist·.next·.turbo 모두 지운 상태): 5개 태스크 모두 cache miss → 7.358s
-- 2회차 (아무것도 안 바꿈): 5개 모두 cache hit → 14ms, FULL TURBO
-- 3회차 (utils/src/price.ts에 주석 한 줄 추가): utils#build, utils#lint, web#build만 cache miss → 3.872s
-  - ui#lint, web#lint는 cache hit. lint는 ^ 의존이 없어서 utils가 바뀌어도 다시 돌지 않는다
-  - web#build는 ^build라서 utils가 바뀌면 같이 다시 빌드된다
-- pnpm 12는 의존성의 설치 스크립트를 기본으로 막는다. esbuild만 allowBuilds로 허용했다
-- eslint-config-next의 플러그인이 ESLint 10을 아직 지원하지 않아서 web만 ESLint 9를 쓴다
--->
+일부러 `Math.floor`를 `Math.round`로 바꾼 PR을 올려서 확인했다.
 
-## ✅ 결과 & 배운 점 ✍️
+![check 실패로 Merge 버튼이 막힌 PR](docs/ci-merge-blocked.png)
 
--
+<details>
+<summary>실패 로그 (expected 500 to be 499)</summary>
+
+![CI 실패 로그](docs/ci-failed-log.png)
+
+</details>
+
+## 🔬 해본 것
+
+1. pnpm workspace로 앱 1개(`apps/web`)와 패키지 2개(`packages/utils`, `packages/ui`)를 묶고, 앱에서 `workspace:*`로 연결했다.
+   - 설치하면 `apps/web/node_modules/@lab/*`가 `packages/` 폴더를 가리키는 심볼릭 링크로 생긴다.
+2. utils는 tsup으로 빌드하고, ui는 `.tsx` 소스를 그대로 내보내 Next의 `transpilePackages`로 컴파일하게 나눴다.
+3. `turbo.json`에서 `build`와 `test`를 `^build`에 걸어, 항상 utils가 먼저 빌드되게 했다.
+4. 같은 명령(`pnpm turbo run lint build`)을 세 번 돌려 캐시가 동작하는 방식을 확인했다.
+5. Vitest로 utils 가격 함수 테스트 10개를 작성했다.
+   - 경계값: 할인율 0%, 100%
+   - 에러: `NaN`, 할인율 101
+   - 버림: 999원 50% → 499원
+   - 부동소수점: 700원 30% → 490원
+6. Testing Library로 ui 수량 선택기 테스트 6개를 작성했다.
+   - 버튼은 `getByRole`과 접근 가능한 이름으로 찾았다.
+   - 클릭은 `userEvent`로 했다.
+7. 코드를 일부러 망가뜨려서, 테스트가 그 버그를 잡는지 하나씩 확인했다.
+8. GitHub Actions에서 PR마다 `pnpm turbo run lint test build`를 돌리고, main 브랜치 보호 규칙으로 `check` 통과를 머지 조건으로 걸었다.
+9. 테스트를 깨뜨린 PR을 올려 머지가 막히는 것을 확인했다(위 캡처).
+
+## ✅ 결과 & 배운 점
+
+**turbo 캐시** (`pnpm turbo run lint build`, 로컬)
+
+| 회차 | 상태                                | 실행된 태스크                      | 시간               |
+| ---- | ----------------------------------- | ---------------------------------- | ------------------ |
+| 1    | `dist`, `.next`, `.turbo` 모두 지움 | 5개 모두                           | 7.358s             |
+| 2    | 아무것도 안 바꿈                    | 0개 (모두 cache hit)               | 14ms, `FULL TURBO` |
+| 3    | `utils/src/price.ts`에 주석 한 줄   | utils#build, utils#lint, web#build | 3.872s             |
+
+- 3회차에서 web#build는 다시 돌았지만 web#lint는 캐시로 끝났다. `build`는 `^build`에 의존해서 utils가 바뀌면 같이 다시 빌드된다. 반면 `lint`는 의존이 없어서 자기 패키지 파일만 본다.
+- 테스트 파일만 고쳐도 utils#build 캐시가 깨졌다. turbo는 기본적으로 패키지 안의 모든 파일을 캐시 판단에 넣는다. `inputs`에서 테스트 파일을 빼면 해결된다.
+
+**단위 테스트**
+
+- 테스트가 없는 함수는 망가져도 초록불이다. `formatPrice` 테스트만 있을 때 `discountedPrice`를 `Math.round`로 바꿨는데 아무 에러도 나지 않았다.
+- 일부러 넣은 버그 4개는 각각 그 버그를 겨냥한 테스트 1개만 실패했다.
+
+| 넣은 버그                              | 실패한 테스트                                                    |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| `Math.floor` → `Math.round`            | 1원 단위는 버린다 (`expected 500 to be 499`)                     |
+| 정수 곱셈 → `price * (1 - rate / 100)` | 부동소수점 오차 없이 계산한다 (`700 * 0.7 = 489.99999999999994`) |
+| `value <= min` → `value < min`         | 수량이 1이면 줄이기 버튼 비활성화                                |
+| `max`를 무시하고 99 고정               | max를 주면 늘리기 버튼 비활성화                                  |
+
+- 마지막 버그는 처음 쓴 테스트(기본값 99만 확인)로는 잡지 못했다. 기본값만 테스트하면 prop이 실제로 쓰이는지 알 수 없다.
+- `getByRole`의 `name`은 접근 가능한 이름이다. `aria-label`이 있으면 화면 글자(`+`, `-`) 대신 `aria-label`로 찾는다. 사용자가 듣는 이름으로 찾기 때문에, 그 이름이 바뀌면 테스트도 깨지는 게 맞다.
+
+**CI 품질 게이트**
+
+- 캐시가 없는 CI에서 전체 실행은 약 30초 걸렸다.
+- 테스트가 실패한 PR에서 turbo는 `Tasks: 0 successful, 6 total`로 끝났고, web#build는 실행되지 않았다. `check`가 빨간불이 되자 Merge 버튼이 비활성화됐다.
+- 첫 PR은 브랜치 보호를 켜기 전에 머지했다. 그래서 머지 차단은 PR을 새로 만들어 확인했다. 규칙은 저장소를 만들 때 먼저 걸어 두는 게 맞다.
+
+**설정하면서 만난 것**
+
+- pnpm은 의존성의 설치 스크립트를 기본으로 막는다(`ERR_PNPM_IGNORED_BUILDS`). tsup이 쓰는 esbuild만 `allowBuilds`로 허용했다.
+- eslint-config-next의 플러그인이 아직 ESLint 10을 지원하지 않아서 web만 ESLint 9를 쓴다. 모노레포라 패키지마다 버전을 다르게 둘 수 있다.
+- `corepack enable`은 그때 쓰던 Node에만 `pnpm`을 연결한다. Node 20에 머물러 있던 터미널에서 `pnpm: command not found`가 나서 `.nvmrc`를 추가했다.
 
 ## 🔗 참고 링크
 
