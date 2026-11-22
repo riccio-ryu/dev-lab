@@ -58,17 +58,18 @@ pnpm-turborepo-vitest/
 
 **turbo 태스크** (`turbo.json`)
 
-| 태스크  | 의존                                    | 캐시 대상             |
-| ------- | --------------------------------------- | --------------------- |
-| `build` | `^build` (의존하는 패키지의 build 먼저) | `dist/**`, `.next/**` |
-| `test`  | `^build`                                | 없음 (로그만)         |
-| `lint`  | 없음                                    | 없음 (로그만)         |
-| `dev`   | 없음                                    | 캐시 안 함            |
+| 태스크  | 의존                                    | 캐시 대상                                  |
+| ------- | --------------------------------------- | ------------------------------------------ |
+| `build` | `^build` (의존하는 패키지의 build 먼저) | `dist/**`, `.next/**` (`.next/cache` 제외) |
+| `test`  | `^build`                                | 없음 (로그만)                              |
+| `lint`  | 없음                                    | 없음 (로그만)                              |
+| `dev`   | 없음                                    | 캐시 안 함                                 |
 
 ## 🚦 CI 품질 게이트
 
 - 워크플로: [`.github/workflows/pnpm-turborepo-vitest.yml`](../../.github/workflows/pnpm-turborepo-vitest.yml)
-  - 이 폴더가 바뀐 PR과 main push에서만 `pnpm turbo run lint test build`를 돈다.
+  - 모든 PR에서 돌되, `changes` job이 이 폴더가 바뀌었는지 먼저 본다. 바뀐 PR에서만 `check` job이 `pnpm turbo run lint test build`를 돈다.
+  - 처음에는 `pull_request`에 `paths`를 걸었다. 그런데 `check`가 필수 체크라서, 다른 실험만 고친 PR에서는 `check`가 아예 안 떠서 머지가 영영 막힌다(최종 리뷰에서 발견). 건너뛴 job은 필수 체크에서 통과로 쳐서, `if`로 건너뛰는 방식으로 바꿨다.
 - main에는 브랜치 보호 규칙(Ruleset)을 걸었다.
   - PR을 거쳐야만 머지할 수 있다.
   - `check`가 통과해야 머지할 수 있다.
@@ -105,7 +106,7 @@ pnpm-turborepo-vitest/
 
 ## ✅ 결과 & 배운 점
 
-**turbo 캐시** (`pnpm turbo run lint build`, 로컬)
+**turbo 캐시** (`pnpm turbo run lint build`, 로컬. 측정할 때는 아직 테스트가 없어서 `test`를 뺐다)
 
 | 회차 | 상태                                | 실행된 태스크                      | 시간               |
 | ---- | ----------------------------------- | ---------------------------------- | ------------------ |
