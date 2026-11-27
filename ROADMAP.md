@@ -23,7 +23,9 @@
 
 ## 🚧 진행 중
 
-없음
+| 주제 | 핵심 질문 | 폴더 | 방식 |
+| --- | --- | --- | --- |
+| Jest | Vitest로 쓴 테스트를 Jest로 옮기면 어떤 설정이 더 필요한가? `jest.mock()`은 언제 쓰나? | [frontend/jest](./frontend/jest) | 공부 + 실험 |
 
 ## ⬜ 다음
 
@@ -31,13 +33,14 @@
 
 | # | 주제 | 핵심 질문 | 폴더 | 방식 | 예정 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | ts-pattern · es-toolkit | 분기를 빠뜨리면 컴파일 에러가 나게 하려면? es-toolkit은 lodash와 무엇이 다른가? | `frontend/ts-pattern-es-toolkit` | 공부 | 11-26 |
-| 2 | A/B 테스트 | 사용자를 어떻게 나누고, 새로고침해도 같은 그룹에 두나? 결과는 언제 믿을 수 있나? | `frontend/ab-test` | 실험 | 11-26 |
-| 3 | ESLint 룰 | ESLint·Biome·Oxlint·Prettier는 각각 무엇을 하나? 팀 규칙을 커스텀 룰로 강제하려면? | `build-tools/eslint-rules` | 공부 + 실험 | 11-27 |
-| 4 | 웹 접근성 (KWCAG) | 레이블·포커스·대체 텍스트·명도 대비를 axe와 Lighthouse로 검사하고 고치면? 스크린 리더로는 어떻게 들리나? | `frontend/a11y-kwcag` | 실험 | |
-| 5 | Lighthouse 성능 | LCP·CLS·INP는 무엇이고, 측정할 때마다 점수가 흔들리는 이유는? LCP 요소는 어떻게 줄이나? | `frontend/a11y-kwcag` 안에 정리 | 공부 + 실험 | |
-| 6 | E2E 테스트 (Playwright) | 실제 브라우저에서 사용자 흐름을 확인하려면? 접근성 검사(axe)도 CI에 넣을 수 있나? | 미정 | 실험 | |
-| 7 | 전역 상태 (Zustand · Jotai) | 여러 컴포넌트가 같이 쓰는 상태는 어디에 두나? 두 라이브러리는 무엇이 다른가? | 미정 | 실험 | |
+| 1 | Storybook | 컴포넌트를 화면과 떼어 상태별로 보려면? stories와 단위 테스트는 무엇이 다른가? | `build-tools/pnpm-turborepo-vitest/packages/ui` | 실험 | 11-28 ~ 29 |
+| 2 | ts-pattern · es-toolkit | 분기를 빠뜨리면 컴파일 에러가 나게 하려면? es-toolkit은 lodash와 무엇이 다른가? | `frontend/ts-pattern-es-toolkit` | 공부 | 12-01 |
+| 3 | A/B 테스트 | 사용자를 어떻게 나누고, 새로고침해도 같은 그룹에 두나? 결과는 언제 믿을 수 있나? | `frontend/ab-test` | 실험 | 12-02 |
+| 4 | ESLint 룰 | ESLint·Biome·Oxlint·Prettier는 각각 무엇을 하나? 팀 규칙을 커스텀 룰로 강제하려면? | `build-tools/eslint-rules` | 공부 + 실험 | 12-03 |
+| 5 | 웹 접근성 (KWCAG) | 레이블·포커스·대체 텍스트·명도 대비를 axe와 Lighthouse로 검사하고 고치면? 스크린 리더로는 어떻게 들리나? | `frontend/a11y-kwcag` | 실험 | |
+| 6 | Lighthouse 성능 | LCP·CLS·INP는 무엇이고, 측정할 때마다 점수가 흔들리는 이유는? LCP 요소는 어떻게 줄이나? | `frontend/a11y-kwcag` 안에 정리 | 공부 + 실험 | |
+| 7 | E2E 테스트 (Playwright) | 실제 브라우저에서 사용자 흐름을 확인하려면? 접근성 검사(axe)도 CI에 넣을 수 있나? | 미정 | 실험 | |
+| 8 | 전역 상태 (Zustand · Jotai) | 여러 컴포넌트가 같이 쓰는 상태는 어디에 두나? 두 라이브러리는 무엇이 다른가? | 미정 | 실험 | |
 
 ## 💤 나중에
 
@@ -58,7 +61,6 @@
 | 차트 라이브러리 어댑터 | 라이브러리를 바꿔도 화면 코드는 그대로 두려면? |
 | 웹뷰 ↔ 네이티브 브릿지 | `postMessage`로 메시지 규약을 어떻게 설계하나? |
 | BFF (Node.js) | 여러 API 응답을 화면에 맞게 묶는 얇은 서버를 만들면? |
-| Storybook | 공통 컴포넌트를 Storybook에 올리고 시안과 비교하려면? |
 | Vue + React 한 모노레포 | `apps/vue-shop`을 붙여 `@lab/utils`만 같이 쓰면? (`pnpm-turborepo-vitest` 확장) |
 
 ## ✅ 끝남
