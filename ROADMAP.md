@@ -23,9 +23,7 @@
 
 ## 🚧 진행 중
 
-| 주제 | 핵심 질문 | 폴더 | 방식 |
-| --- | --- | --- | --- |
-| Jest | Vitest로 쓴 테스트를 Jest로 옮기면 어떤 설정이 더 필요한가? `jest.mock()`은 언제 쓰나? | [frontend/jest](./frontend/jest) | 공부 + 실험 |
+없음
 
 ## ⬜ 다음
 
@@ -33,14 +31,13 @@
 
 | # | 주제 | 핵심 질문 | 폴더 | 방식 | 예정 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Storybook | 컴포넌트를 화면과 떼어 상태별로 보려면? stories와 단위 테스트는 무엇이 다른가? | `build-tools/pnpm-turborepo-vitest/packages/ui` | 실험 | 11-28 ~ 29 |
-| 2 | ts-pattern · es-toolkit | 분기를 빠뜨리면 컴파일 에러가 나게 하려면? es-toolkit은 lodash와 무엇이 다른가? | `frontend/ts-pattern-es-toolkit` | 공부 | 12-01 |
-| 3 | A/B 테스트 | 사용자를 어떻게 나누고, 새로고침해도 같은 그룹에 두나? 결과는 언제 믿을 수 있나? | `frontend/ab-test` | 실험 | 12-02 |
-| 4 | ESLint 룰 | ESLint·Biome·Oxlint·Prettier는 각각 무엇을 하나? 팀 규칙을 커스텀 룰로 강제하려면? | `build-tools/eslint-rules` | 공부 + 실험 | 12-03 |
-| 5 | 웹 접근성 (KWCAG) | 레이블·포커스·대체 텍스트·명도 대비를 axe와 Lighthouse로 검사하고 고치면? 스크린 리더로는 어떻게 들리나? | `frontend/a11y-kwcag` | 실험 | |
-| 6 | Lighthouse 성능 | LCP·CLS·INP는 무엇이고, 측정할 때마다 점수가 흔들리는 이유는? LCP 요소는 어떻게 줄이나? | `frontend/a11y-kwcag` 안에 정리 | 공부 + 실험 | |
-| 7 | E2E 테스트 (Playwright) | 실제 브라우저에서 사용자 흐름을 확인하려면? 접근성 검사(axe)도 CI에 넣을 수 있나? | 미정 | 실험 | |
-| 8 | 전역 상태 (Zustand · Jotai) | 여러 컴포넌트가 같이 쓰는 상태는 어디에 두나? 두 라이브러리는 무엇이 다른가? | 미정 | 실험 | |
+| 1 | ts-pattern · es-toolkit | 분기를 빠뜨리면 컴파일 에러가 나게 하려면? es-toolkit은 lodash와 무엇이 다른가? | `frontend/ts-pattern-es-toolkit` | 공부 | 12-01 |
+| 2 | A/B 테스트 | 사용자를 어떻게 나누고, 새로고침해도 같은 그룹에 두나? 결과는 언제 믿을 수 있나? | `frontend/ab-test` | 실험 | 12-02 |
+| 3 | ESLint 룰 | ESLint·Biome·Oxlint·Prettier는 각각 무엇을 하나? 팀 규칙을 커스텀 룰로 강제하려면? | `build-tools/eslint-rules` | 공부 + 실험 | 12-03 |
+| 4 | 웹 접근성 (KWCAG) | 레이블·포커스·대체 텍스트·명도 대비를 axe와 Lighthouse로 검사하고 고치면? 스크린 리더로는 어떻게 들리나? | `frontend/a11y-kwcag` | 실험 | |
+| 5 | Lighthouse 성능 | LCP·CLS·INP는 무엇이고, 측정할 때마다 점수가 흔들리는 이유는? LCP 요소는 어떻게 줄이나? | `frontend/a11y-kwcag` 안에 정리 | 공부 + 실험 | |
+| 6 | E2E 테스트 (Playwright) | 실제 브라우저에서 사용자 흐름을 확인하려면? 접근성 검사(axe)도 CI에 넣을 수 있나? | 미정 | 실험 | |
+| 7 | 전역 상태 (Zustand · Jotai) | 여러 컴포넌트가 같이 쓰는 상태는 어디에 두나? 두 라이브러리는 무엇이 다른가? | 미정 | 실험 | |
 
 ## 💤 나중에
 
@@ -67,5 +64,7 @@
 
 | 끝난 날 | 주제 | 폴더 |
 | --- | --- | --- |
+| 2026-11-29 | Storybook (ui 패키지 stories, play 함수) | [build-tools/pnpm-turborepo-vitest](./build-tools/pnpm-turborepo-vitest) |
+| 2026-11-28 | Jest (Vitest 테스트 옮기기, mock) | [frontend/jest](./frontend/jest) |
 | 2026-11-23 | 모노레포 + 단위·컴포넌트 테스트 + CI 품질 게이트 | [build-tools/pnpm-turborepo-vitest](./build-tools/pnpm-turborepo-vitest) |
 | 2026-11-19 | Next 10 → 14 버전업 | [frontend/next-10-to-14](./frontend/next-10-to-14) |

@@ -9,6 +9,7 @@
   },
   "include": [
     "src",
-    "vitest.setup.ts"
+    "vitest.setup.ts",
+    ".storybook"
   ]
 }

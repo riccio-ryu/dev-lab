@@ -1,6 +1,6 @@
 # pnpm + Turborepo + Vitest 모노레포
 
-> 📅 2026-11-19 · 🏷️ pnpm workspace, Turborepo, Vitest, Testing Library, GitHub Actions
+> 📅 2026-11-19 · 🏷️ pnpm workspace, Turborepo, Vitest, Testing Library, GitHub Actions, Storybook
 
 ## 🎯 목적 / 질문
 
@@ -11,6 +11,7 @@
 - utils는 빌드하고 ui는 소스 그대로 둔 이유는?
 - 무엇을 단위 테스트했고, 무엇은 안 했는가?
 - 같은 컴포넌트를 여러 번 쓰면 상태는 어떻게 나뉘고, 테스트에서는 어떻게 하나만 골라 찾는가?
+- 공용 UI 패키지에 Storybook을 붙이면 단위 테스트와 무엇이 다른가?
 
 ## 🛠️ 환경
 
@@ -22,6 +23,7 @@
 | Next       | 16.x (App Router)                    |
 | React      | 19.x                                 |
 | TypeScript | 5.9                                  |
+| Storybook  | 10.x (`@storybook/react-vite`, ui만) |
 
 ## ▶️ 실행 방법
 
@@ -31,6 +33,7 @@ corepack enable pnpm   # packageManager에 적힌 pnpm 버전을 받아서 쓴�
 pnpm install
 
 pnpm dev               # http://localhost:3000
+pnpm --filter @lab/ui storybook   # http://localhost:6006 (ui 컴포넌트 카탈로그)
 pnpm turbo run lint test build
 ```
 
@@ -44,7 +47,7 @@ pnpm-turborepo-vitest/
 │   └── web/          # Next App Router. 상품 카드 5개. @lab/ui, @lab/utils를 workspace:*로 쓴다
 └── packages/
     ├── utils/        # 가격 유틸. tsup으로 dist를 만든다 (빌드하는 패키지)
-    └── ui/           # Button, QuantitySelector. .tsx 소스를 그대로 내보낸다
+    └── ui/           # Button, QuantitySelector. .tsx 소스를 그대로 내보낸다. Storybook(.storybook/, *.stories.tsx)
 ```
 
 | 패키지       | 내보내는 것                        | 빌드 | 앱에서 쓰는 방법                    |
@@ -112,6 +115,11 @@ pnpm-turborepo-vitest/
 11. web에도 Vitest를 붙이고(ui 설정을 그대로 옮김) 상품 목록 테스트 5개를 작성했다.
     - 「수량 늘리기」 버튼이 5개라 `within(screen.getByRole('region', { name: '노트북' }))`으로 카드 안에서만 찾았다.
     - 노트북 수량을 바꾼 뒤 마우스 수량이 그대로인지 확인했다.
+12. ui 패키지에 Storybook 10을 붙였다.
+    - `storybook init` 대신 패키지 4개를 직접 설치하고 `.storybook/main.ts`·`preview.ts`를 썼다.
+    - `Button` story 3개(Primary, Secondary, Disabled)와 `QuantitySelector` story 5개(Default, AtMin, AtMax, CustomMax, ClickIncrease)를 썼다. `tags: ['autodocs']`로 Docs 페이지도 생긴다.
+    - `QuantitySelector`는 `value`를 밖에서 받아야 움직여서, meta의 `render`에서 `useArgs`로 버튼을 누를 때 `args.value`를 바꾸게 했다.
+13. ClickIncrease에 play 함수를 붙여, story가 그려지면 늘리기 버튼을 누르고 4가 되는지와 `onChange(4)`를 자동으로 확인했다.
 
 ## ✅ 결과 & 배운 점
 
@@ -156,6 +164,16 @@ web 상품 목록 테스트도 같은 방식으로 버그를 하나씩 넣어 �
 - 수량을 같이 쓰게 만든 버그는 모듈 변수라서 테스트가 끝나도 값이 남았다. 앞 테스트가 2로 바꾼 상태에서 시작해 합계 테스트도 같이 깨졌다. `useState`는 컴포넌트를 쓸 때마다 상태가 새로 생겨서 이런 일이 없다.
 - 테스트마다 `cleanup`이 화면을 비우기 때문에, `render`를 빼먹으면 `<body />`가 빈 채로 「There are no accessible roles」 에러가 난다.
 
+**Storybook**
+
+- story는 「props를 정해 둔 화면 하나」다. `args`가 곧 props라서, 테스트의 `render(<Button disabled>품절</Button>)`를 `args: { children: '품절', disabled: true }`로 적어 두는 셈이다. 단위 테스트는 맞는지 확인하고, story는 상태별로 눈으로 보고 Controls로 props를 바꿔 볼 수 있다.
+- 처음에는 `render`에서 `useState(args.value)`로 수량을 들었다. `useState`의 초기값은 처음 한 번만 쓰여서, Controls에서 `value`를 바꿔도 화면이 따라오지 않는다. `useArgs`로 args를 직접 바꾸게 해서 Controls와 버튼이 같은 값을 보게 했다.
+- 그런데 `useArgs`를 쓴 채로 play 함수를 붙이자 문제가 두 개 생겼다.
+  - 클릭 직후 `getByText('4')`가 실패했다. `updateArgs`는 Storybook 바깥에 요청을 보냈다가 돌아와야 다시 그려서, 그 순간 화면은 아직 3이었다.
+  - 바뀐 값이 주소에 `&args=value:4`로 저장됐다. 다시 열면 4에서 시작해 play가 또 눌러서, 열 때마다 1씩 커졌다.
+  - play를 붙이는 story만 `useState`로 수량을 자기 상태로 들게 해서 해결했다. React가 클릭을 처리하면서 바로 다시 그려 `getByText`로도 찾는다.
+- Storybook을 빌드한 뒤 `pnpm lint`가 빌드 결과(`storybook-static/`)까지 검사해서 에러가 1만 개 넘게 났다. ESLint `ignores`와 `.gitignore`에 넣었다.
+
 **CI 품질 게이트**
 
 - 캐시가 없는 CI에서 전체 실행은 약 30초 걸렸다.
@@ -174,3 +192,5 @@ web 상품 목록 테스트도 같은 방식으로 버그를 하나씩 넣어 �
 - [Turborepo: Internal packages](https://turborepo.com/docs/core-concepts/internal-packages)
 - [Turborepo: Caching](https://turborepo.com/docs/crafting-your-repository/caching)
 - [Next.js: transpilePackages](https://nextjs.org/docs/app/api-reference/config/next-config-js/transpilePackages)
+- [Storybook: Args](https://storybook.js.org/docs/writing-stories/args)
+- [Storybook: Play function](https://storybook.js.org/docs/writing-stories/play-function)
