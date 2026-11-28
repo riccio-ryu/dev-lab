@@ -23,9 +23,7 @@
 
 ## 🚧 진행 중
 
-| 주제 | 핵심 질문 | 폴더 | 방식 |
-| --- | --- | --- | --- |
-| Storybook | 컴포넌트를 화면과 떼어 상태별로 보려면? stories와 단위 테스트는 무엇이 다른가? | [build-tools/pnpm-turborepo-vitest/packages/ui](./build-tools/pnpm-turborepo-vitest/packages/ui) | 실험 |
+없음
 
 ## ⬜ 다음
 
@@ -66,6 +64,7 @@
 
 | 끝난 날 | 주제 | 폴더 |
 | --- | --- | --- |
+| 2026-11-29 | Storybook (ui 패키지 stories, play 함수) | [build-tools/pnpm-turborepo-vitest](./build-tools/pnpm-turborepo-vitest) |
 | 2026-11-28 | Jest (Vitest 테스트 옮기기, mock) | [frontend/jest](./frontend/jest) |
 | 2026-11-23 | 모노레포 + 단위·컴포넌트 테스트 + CI 품질 게이트 | [build-tools/pnpm-turborepo-vitest](./build-tools/pnpm-turborepo-vitest) |
 | 2026-11-19 | Next 10 → 14 버전업 | [frontend/next-10-to-14](./frontend/next-10-to-14) |
