@@ -10,11 +10,13 @@
 
 | 기간 | 분류 | 실험 | 한 줄 요약 |
 | --- | --- | --- | --- |
+| 2026-11-27 ~ 11-28 | frontend | [jest](./frontend/jest) | Vitest로 쓴 테스트를 Jest·babel-jest로 옮기고, `jest.mock`으로 API 모킹 |
 | 2026-11-19 ~ 11-23 | build-tools | [pnpm-turborepo-vitest](./build-tools/pnpm-turborepo-vitest) | pnpm + Turborepo 모노레포, Vitest·Testing Library 테스트, GitHub Actions 품질 게이트 |
 | 2026-10-26 ~ 11-19 | frontend | [next-10-to-14](./frontend/next-10-to-14) | Next 10 → 14 버전업 (Pages 유지 → App Router 이전) |
 
 **바로 가기**
 
+- [jest 실험](./frontend/jest): Vitest에는 없던 설정 3가지(Babel 변환, 타입 검사, CSS import), mock 기록이 테스트 사이에 남는 문제, 속도 비교
 - [pnpm-turborepo-vitest 실험](./build-tools/pnpm-turborepo-vitest): workspace 연결, turbo 캐시 측정, 테스트 21개, 머지가 막히는 CI
 - [next-10-to-14 실험](./frontend/next-10-to-14): Next 10 → 14에서 실제로 깨지는 지점, Node·React·TypeScript를 올리는 순서, Pages Router → App Router 이전
 

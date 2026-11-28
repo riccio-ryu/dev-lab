@@ -52,6 +52,14 @@
   - 키보드는 할인 0%로 둔다. 할인이 없으면 원래 가격(취소선)과 「(N% 할인)」 없이 가격만 보여 준다. 테스트할 분기를 하나 만들기 위해서다.
   - 테스트(`apps/web/app/page.test.tsx`)는 사용자가 쓴다. 카드 5개, `within`, 카드끼리 수량이 독립인지, 할인 0% 표시.
 
+**추가: Storybook** (2026-11-28, 인계 문서 11-2)
+- `packages/ui`에 Storybook 10(`@storybook/react-vite`)을 붙인다. 같은 컴포넌트에 단위 테스트(Vitest)와 카탈로그(Storybook)를 함께 둔다.
+- 정한 것 (Claude)
+  - `storybook init`은 예제 파일을 많이 만들어서 쓰지 않고, 패키지 4개(`storybook`, `@storybook/react-vite`, `@storybook/addon-docs`, `vite`)를 직접 설치하고 `.storybook/main.ts`·`preview.ts`를 손으로 쓴다. `vite`는 `@storybook/react-vite`의 peer라서 명시했다.
+  - stories는 ui의 `Button`, `QuantitySelector`만 쓴다. `ProductCard`는 `apps/web`에 있어서 ui의 Storybook이 import할 수 없다.
+  - CI에는 넣지 않는다. `build-storybook`은 로컬에서만 돌린다. 빌드 결과 `storybook-static/`은 `.gitignore`와 ESLint `ignores`에 넣었다(넣기 전에는 lint가 빌드 결과를 검사해 1만여 개 에러가 났다).
+- stories 코드(`*.stories.tsx`)와 README 「해본 것·결과」는 사용자가 쓴다.
+
 **실패로 보는 것** (돌아가도 실패)
 - 테스트 코드를 직접 쓰지 않아서, 왜 그 케이스를 골랐는지 설명하지 못하는 경우.
 - 11/24를 넘기는 경우. 넘길 것 같으면 범위를 줄인다(8장 참고).

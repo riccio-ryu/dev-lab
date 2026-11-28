@@ -31,6 +31,7 @@ corepack enable pnpm   # packageManager에 적힌 pnpm 버전을 받아서 쓴�
 pnpm install
 
 pnpm dev               # http://localhost:3000
+pnpm --filter @lab/ui storybook   # http://localhost:6006 (ui 컴포넌트 카탈로그)
 pnpm turbo run lint test build
 ```
 
@@ -44,7 +45,7 @@ pnpm-turborepo-vitest/
 │   └── web/          # Next App Router. 상품 카드 5개. @lab/ui, @lab/utils를 workspace:*로 쓴다
 └── packages/
     ├── utils/        # 가격 유틸. tsup으로 dist를 만든다 (빌드하는 패키지)
-    └── ui/           # Button, QuantitySelector. .tsx 소스를 그대로 내보낸다
+    └── ui/           # Button, QuantitySelector. .tsx 소스를 그대로 내보낸다. Storybook(.storybook/, *.stories.tsx)
 ```
 
 | 패키지       | 내보내는 것                        | 빌드 | 앱에서 쓰는 방법                    |
